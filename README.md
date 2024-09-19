@@ -30,7 +30,13 @@ This repository is for NTU Lifeguard. The repo creates a chatbot, which is power
 
 5. Create a Discord chatbot, for more details please check [here](https://discord.com/developers/docs/intro)
 
-6. Create .env file, copy the text in .env.example and fill in (1) Discord channel ID (2) Discord channel name (3) NTU account (4) NTU password (5) [NTU rental system url](https://rent.pe.ntu.edu.tw/member/) (6) Discord bot token
+6. Create .env file, copy the text in .env.example and fill in 
+(1) Discord channel ID 
+(2) Discord channel name 
+(3) NTU account 
+(4) NTU password 
+(5) NTU rental system url: https://rent.pe.ntu.edu.tw/member/ 
+(6) Discord bot token
 
 
 
@@ -50,6 +56,4 @@ python main.py
 Yuan-Chia, Chang - ycchang0324@gmail.com
 
 Project Link: [https://github.com/ycchang0324/discord_ticket_bot](https://github.com/ycchang0324/discord_ticket_bot)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
