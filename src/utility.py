@@ -206,10 +206,10 @@ def get_ticket_num(driver, category):
         return None
 
 def check_ticket_num(driver, ticket_num, category):
-    success = True
+    success = False
     counter = 0
-    while counter < 2:
-        time.sleep(0.2)
+    while counter < 20:
+        time.sleep(10)
         driver.refresh()
         system_ticket_num = get_ticket_num(driver, category)
         if system_ticket_num == None:
