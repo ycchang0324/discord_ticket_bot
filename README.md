@@ -43,10 +43,18 @@ This repository is for NTU Lifeguard. The repo creates a chatbot, which is power
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-execute main.py
-```sh
-python main.py
-```
+1. execute main.py
+   ```sh
+   python main.py
+   ```
+
+2. If you want to create 24hr Discord chatbot, you can create .bat file and uses Task Scheduler, which is a Windows build-in tools to wake up the chatbot every once in a while
+   ```sh
+   cd /d "the absolute directory of the repository in your computer"
+   call python main.py
+   REM pause
+   ```
+
 
 
 
