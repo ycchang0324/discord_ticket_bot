@@ -13,12 +13,7 @@ from selenium.webdriver.chrome.options import Options
 from src.get_ticket import get_ticket
 from dotenv import load_dotenv
 
-# 初始化 bot，並啟用必要的 intents
-intents = discord.Intents.default()
-intents.messages = True  # 啟用處理訊息的 intents
-intents.dm_messages = True  # 啟用接收私訊的 intents
-
-bot = commands.Bot(command_prefix="!", intents=intents)
+bot = commands.Bot(command_prefix="!", intents=discord.Intents.default())
 
 # 載入 .env 檔案中的環境變數
 load_dotenv()
@@ -89,47 +84,14 @@ async def ticket(ctx: discord.ApplicationContext):
 
 轉帳資料：**(700) 中華郵政 00610490236328**
 
-街口支付可以儲存下面的付款碼，使用 APP 付款
+請幫我在轉帳備註欄填上姓名或是 Discord 暱稱喔
 
-付款成功後再麻煩把匯款證明私訊呆呆獸喔 (´･ω･`)
+街口支付可以儲存下面的付款碼，再使用 APP 付款
+
+如果有其他問題，歡迎私訊 45 張原嘉 (´･ω･`)
         """,
         file=qrcode,
         ephemeral=True
     )
-
-@bot.event
-async def on_message(message):
-    # 檢查是否為私訊 (DM)，且不是機器人自己發的訊息
-    if isinstance(message.channel, discord.DMChannel) and message.author != bot.user:
-        try:
-            # 使用 fetch_user 來獲取您自己（admin_user_id）
-            target_user = await bot.fetch_user(admin_user_id)
-
-            # 如果有文字訊息，則轉發文字
-            if message.content:
-                forward_message = f"來自 {message.author}: {message.content}"
-                await target_user.send(forward_message)
-
-            # 檢查訊息中是否有附件
-            if message.attachments:
-                for attachment in message.attachments:
-                    # 發送附件（例如圖片）給目標使用者
-                    await target_user.send(content=f"來自 {message.author} 的附件:", file=await attachment.to_file())
-
-            # 回覆發送者，確認已收到並轉發
-            await message.channel.send(
-                f"""{message.author} 你好！謝謝你使用呆呆獸！希望你有個愉快的使用體驗(ゝ∀･)
-        
-歡迎再次使用我喔~祝你有個美好的一天⋛⋋( ‘Θ’)⋌⋚
-                """
-            )
-        except discord.NotFound:
-            await message.channel.send("無法找到目標使用者。")
-        except discord.HTTPException:
-            await message.channel.send("發送訊息時出現問題。")
-    
-    # 讓其他的命令繼續被處理
-    await bot.process_commands(message)
-
 
 bot.run(token)
