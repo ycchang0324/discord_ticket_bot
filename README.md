@@ -29,9 +29,9 @@ This repository is for NTU Lifeguard. The repo creates a chatbot, which is power
    pip install -r requirements.txt
    ```
 
-4. Download webdriver with appropriate version, for more details please check [here](https://developer.chrome.com/docs/chromedriver?hl=zh-tw)
+4. Download webdriver with appropriate version, for more details please check [here](https://developer.chrome.com/docs/chromedriver?hl=zh-tw).
 
-5. Create a Discord chatbot, for more details please check [here](https://discord.com/developers/docs/intro)
+5. Create a Discord chatbot, for more details please check [here](https://discord.com/developers/docs/intro).
 
 The setting for discord bot is shown in the following picture.
 ![](examples/bot_setting.png)
@@ -40,12 +40,11 @@ The setting for discord bot is shown in the following picture.
 
 7. Create .env file, copy the text in .env.example and fill in  
 (1) Discord channel ID  
-(2) Discord channel name   
-(3) Discord admin user ID  
-(4) NTU account  
-(5) NTU password  
-(6) NTU rental system url: https://rent.pe.ntu.edu.tw/member/  
-(7) Discord bot token  
+(2) Discord channel name    
+(3) NTU account  
+(4) NTU password  
+(5) NTU rental system url: https://rent.pe.ntu.edu.tw/member/  
+(6) Discord bot token.  
 
 <!-- USAGE EXAMPLES -->
 ## Usage
@@ -55,7 +54,7 @@ The setting for discord bot is shown in the following picture.
    python main.py
    ```
 
-2. If you want to create 24hr Discord chatbot, you can create .bat file and uses Task Scheduler, which is a Windows build-in tools to wake up the chatbot every once in a while
+2. If you want to create 24hr Discord chatbot, you can create .bat file and uses Task Scheduler, which is a Windows build-in tools to wake up the chatbot every once in a while.
    ```sh
    cd /d "the absolute directory of the repository in your computer"
    call python main.py

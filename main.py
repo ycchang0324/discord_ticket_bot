@@ -19,7 +19,6 @@ bot = commands.Bot(command_prefix="!", intents=discord.Intents.default())
 load_dotenv()
 target_channel_id = os.getenv('CHANNEL_ID')
 target_channel_name = os.getenv('CHANNEL_NAME')
-admin_user_id = os.getenv('ADMIN_USER_ID')
 your_account = os.getenv('ACCOUNT')  # NTU COOL 帳號
 your_password = os.getenv('PASSWORD')  # NTU COOL 密碼
 your_web_url = os.getenv('URL')  # 租借系統網址
