@@ -5,6 +5,7 @@
 
 This repository is for NTU Lifeguard. The repo creates a chatbot, which is powered by Selenium and Discord API. By sending messages in specific Discord channel, the chatbot will generate QRCode for NTU swimming pool and NTU fitness center.
 
+### Usage Example
 ![](examples/usage.gif)
 
 ### Requirements
@@ -32,15 +33,19 @@ This repository is for NTU Lifeguard. The repo creates a chatbot, which is power
 
 5. Create a Discord chatbot, for more details please check [here](https://discord.com/developers/docs/intro)
 
+The setting for discord bot is shown in the following picture.
 ![](examples/bot_setting.png)
 
-6. Create .env file, copy the text in .env.example and fill in 
+6. Add the payment QRCode as payment_qrcode.png in img folder.
+
+7. Create .env file, copy the text in .env.example and fill in 
 (1) Discord channel ID 
 (2) Discord channel name 
-(3) NTU account 
-(4) NTU password 
-(5) NTU rental system url: https://rent.pe.ntu.edu.tw/member/ 
-(6) Discord bot token
+(3) Discord admin user ID
+(4) NTU account 
+(5) NTU password 
+(6) NTU rental system url: https://rent.pe.ntu.edu.tw/member/ 
+(7) Discord bot token
 
 
 
@@ -58,9 +63,6 @@ This repository is for NTU Lifeguard. The repo creates a chatbot, which is power
    call python main.py
    REM pause
    ```
-
-
-
 
 <!-- CONTACT -->
 ## Contact

@@ -50,7 +50,7 @@ async def get_ticket(ctx, category, driver, your_web_url, your_account, your_pas
             
             usage_path = os.path.join(base_dir, 'log', 'usage.txt')
             if success:
-                await ctx.interaction.edit_original_response(content=f"{sender_name} 已成功使用 {category} 票卷！ \n\n 再請你匯款、現金或是 Line Pay 給張原嘉了，匯款資訊可以發送 /help 來獲取喔", file=empty_pic)
+                await ctx.interaction.edit_original_response(content=f"{sender_name} 已成功使用 {category} 票卷！ \n\n 再請你匯款或是街口支付了，詳細資訊可以發送 /help 來獲取喔", file=empty_pic)
                 ticket_num = ticket_num - 1
                 log_to_file(f"{sender_name} 成功使用 {category} QR Code，剩餘 {ticket_num} 張", usage_path)
 
