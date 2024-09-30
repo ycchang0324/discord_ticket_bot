@@ -105,11 +105,12 @@ async def on_message(message):
             # 使用 fetch_user 來獲取您自己（admin_user_id）
             target_user = await bot.fetch_user(admin_user_id)
 
-            # 轉發私訊內容給您自己
-            forward_message = f"來自 {message.author}: {message.content}"
-            await target_user.send(forward_message)
+            # 如果有文字訊息，則轉發文字
+            if message.content:
+                forward_message = f"來自 {message.author}: {message.content}"
+                await target_user.send(forward_message)
 
-             # 檢查訊息中是否有附件
+            # 檢查訊息中是否有附件
             if message.attachments:
                 for attachment in message.attachments:
                     # 發送附件（例如圖片）給目標使用者
@@ -117,11 +118,11 @@ async def on_message(message):
 
             # 回覆發送者，確認已收到並轉發
             await message.channel.send(
-        f"""{message.author} 你好！謝謝你使用呆呆獸！希望你有個愉快的使用體驗(ゝ∀･)
+                f"""{message.author} 你好！謝謝你使用呆呆獸！希望你有個愉快的使用體驗(ゝ∀･)
         
 歡迎再次使用我喔~祝你有個美好的一天⋛⋋( ‘Θ’)⋌⋚
-        """
-    )
+                """
+            )
         except discord.NotFound:
             await message.channel.send("無法找到目標使用者。")
         except discord.HTTPException:
