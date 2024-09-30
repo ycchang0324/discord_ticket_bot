@@ -1,5 +1,5 @@
-discord.py
-selenium
-webdriver-manager
-Pillow
-python-dotenv
+discord.py==2.4.0
+selenium==4.24.0
+webdriver-manager==4.0.2
+Pillow==9.1.1
+python-dotenv==1.0.1
