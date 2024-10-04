@@ -71,4 +71,4 @@ async def get_ticket(ctx, category, driver, your_web_url, your_account, your_pas
         await finish_message.delete()
         
     else:
-        await ctx.respond(f"請在 {target_channel_name} 頻道中發送 /給我票 以索取 {category} QR Code 連結喔", ephemeral=True)
+        await ctx.respond(f"請在 **{target_channel_name}** 頻道中發送 **/給我{category}票** 以索取 {category} QR Code 連結喔", ephemeral=True)
