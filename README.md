@@ -39,8 +39,8 @@ The setting for discord bot is shown in the following picture.
 6. Add the payment QRCode as payment_qrcode.png in img folder.
 
 7. Create .env file, copy the text in .env.example and fill in  
-(1) Discord channel ID  
-(2) Discord channel name    
+(1) Discord channel IDs(can be multiple, separated by colons)
+(2) Discord channel name(only for main channel's name)    
 (3) NTU account  
 (4) NTU password  
 (5) NTU rental system url: https://rent.pe.ntu.edu.tw/member/  

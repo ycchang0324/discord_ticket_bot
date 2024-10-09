@@ -17,7 +17,7 @@ bot = commands.Bot(command_prefix="!", intents=discord.Intents.default())
 
 # 載入 .env 檔案中的環境變數
 load_dotenv()
-target_channel_id = os.getenv('CHANNEL_ID')
+target_channel_ids = os.getenv('CHANNEL_IDS').split(',')
 target_channel_name = os.getenv('CHANNEL_NAME')
 your_account = os.getenv('ACCOUNT')  # NTU COOL 帳號
 your_password = os.getenv('PASSWORD')  # NTU COOL 密碼
@@ -26,6 +26,7 @@ token = os.getenv('TOKEN')
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
+
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
 
@@ -39,18 +40,18 @@ async def on_ready():
 # 定义一个 Slash 命令
 @bot.slash_command(name="給我游泳池票", description="索取台大游泳池票卷 QR Code ><")
 async def swimming_ticket(ctx: discord.ApplicationContext):
-    await get_ticket(ctx, "游泳池", driver, your_web_url, your_account, your_password, target_channel_id, target_channel_name)
+    await get_ticket(bot, ctx, "游泳池", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name)
 
 # 定义一个 Slash 命令
 @bot.slash_command(name="給我健身中心票", description="索取台大健身中心票卷 QR Code ><")
 async def swimming_ticket(ctx: discord.ApplicationContext):
-    await get_ticket(ctx, "健身中心", driver, your_web_url, your_account, your_password, target_channel_id, target_channel_name)
+    await get_ticket(bot, ctx, "健身中心", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name)
     
     
 
 @bot.slash_command(name="help", description="呆呆獸怎麼用")
 async def ticket(ctx: discord.ApplicationContext):
-    if ctx.channel.id == int(target_channel_id):
+    if str(ctx.channel.id) in target_channel_ids:
         # 告訴 Discord 正在處理，延遲回應
         await ctx.defer(ephemeral=True)
 
