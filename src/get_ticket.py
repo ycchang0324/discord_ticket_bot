@@ -84,8 +84,8 @@ async def get_ticket(bot, ctx, category, driver, your_web_url, your_account, you
             else:
                 print(f'無法找到頻道 {channel_id}')  
 
-        await asyncio.sleep(60)
-        for channel_id, sent_message in  welcome_messages_dict.items():
+        await asyncio.sleep(6)
+        for channel_id, sent_message in  finish_messages_dict.items():
             await sent_message.delete()
         
         
