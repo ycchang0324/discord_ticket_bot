@@ -36,6 +36,33 @@ driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), opti
 async def on_ready():
     print(f"目前登入身份 --> {bot.user}")
     
+@bot.event
+async def on_message(message):
+    # 防止机器人回复自己
+    if message.author == bot.user:
+        return
+
+    # 检测消息是否提及了机器人
+    if bot.user in message.mentions:
+        await message.channel.send(
+            f"""{message.author.mention} 你好！我是呆呆獸，很高興認識你 ▼・ᴥ・▼
+
+我將提供 **台大游泳池票** 以及** 台大健身中心票** 給你喔~
+
+在 **小幫手** 頻道中 (っ・Д・)っ
+
+你可以發送 **`/給我游泳池票`** 以索取台大游泳池 QR Code (=^-ω-^=)
+
+或是在 **小幫手** 頻道中發送 **`/給我健身中心票`** 以索取台大健身中心 QR Code ฅ^•ﻌ•^ฅ
+
+可以在 **小幫手** 頻道中發送 **`/help`** 來得到更多資訊喔 (´･ω･`)
+
+運動真的很開心呢，希望能跟大家一起開心游泳和健身 (^_っ^)
+            """
+        )
+
+    # 处理其他命令
+    await bot.process_commands(message)
 
 # 定义一个 Slash 命令
 @bot.slash_command(name="給我游泳池票", description="索取台大游泳池票卷 QR Code ><")
@@ -71,25 +98,25 @@ async def ticket(ctx: discord.ApplicationContext):
         await ctx.followup.send(
             f"""請在 **{target_channel_name}** 頻道中
 
-    **發送 `/給我游泳池票`** 以索取台大游泳池 QR Code
+**發送 `/給我游泳池票`** 以索取台大游泳池 QR Code
 
-    **發送 `/給我健身中心票`** 以索取台大健身中心 QR Code
+**發送 `/給我健身中心票`** 以索取台大健身中心 QR Code
 
-    **QR Code** 請在三分鐘之內使用
+**QR Code** 請在三分鐘之內使用
 
-    台大游泳池票卷費用：**30 元**
+台大游泳池票卷費用：**30 元**
 
-    健身中心票卷費用：**25 元**
+健身中心票卷費用：**25 元**
 
-    在使用 QR Code 成功後，可以用 **街口支付** 或是 **轉帳**
+在使用 QR Code 成功後，可以用 **街口支付** 或是 **轉帳**
 
-    轉帳資料：**(700) 中華郵政 00610490236328**
+轉帳資料：**(700) 中華郵政 00610490236328**
 
-    請幫我在轉帳備註欄填上 **姓名** 或是 **Discord 暱稱** 喔
+請幫我在轉帳備註欄填上 **姓名** 或是 **Discord 暱稱** 喔
 
-    街口支付可以儲存下面的付款碼，再使用 APP 付款
+街口支付可以儲存下面的付款碼，再使用 APP 付款
 
-    如果有其他問題，歡迎私訊 **45 張原嘉** (´･ω･`)
+如果有其他問題，歡迎私訊 **45 張原嘉** (´･ω･`)
             """,
             file=qrcode,
             ephemeral=True

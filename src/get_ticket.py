@@ -90,4 +90,4 @@ async def get_ticket(bot, ctx, category, driver, your_web_url, your_account, you
         
         
     else:
-        await ctx.respond(f"請在 **{target_channel_name}** 頻道中發送 **/給我{category}票** 以索取 {category} QR Code 連結喔", ephemeral=True)
+        await ctx.respond(f"請在 **{target_channel_name}** 頻道中發送 **/給我{category}票** 以索取 {category} QR Code 喔", ephemeral=True)
