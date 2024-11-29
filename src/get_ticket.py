@@ -39,7 +39,7 @@ async def get_ticket(bot, ctx, category, driver, your_web_url, your_account, you
         if ticket_num < 2:
             await ctx.channel.send(f"{category} 票卷不足，請加值><")
         else:
-            if ticket_num < 11:
+            if ticket_num < 6:
                 await ctx.channel.send(f"{category} 票卷即將不足，請加值><")
             
             
