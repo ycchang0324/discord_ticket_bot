@@ -24,11 +24,36 @@ your_password = os.getenv('PASSWORD')  # NTU COOL 密碼
 your_web_url = os.getenv('URL')  # 租借系統網址
 token = os.getenv('TOKEN')
 
+# 定義 WebDriver 管理類
+class WebDriverManager:
+    def __init__(self, options):
+        self.options = options
+        self.driver = self.create_driver()
+
+    def create_driver(self):
+        # 建立新的 WebDriver 實例
+        return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=self.options)
+
+    def get_driver(self):
+        try:
+            # 嘗試使用當前的 WebDriver
+            self.driver.title  # 檢查 driver 是否存活
+        except Exception:
+            # 如果 driver 不可用，重新創建
+            self.driver.quit()
+            self.driver = self.create_driver()
+        return self.driver
+
+# 初始化 Selenium WebDriver 選項
 chrome_options = Options()
-chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")  # 啟用無頭模式
+chrome_options.add_argument("--disable-gpu")  # 禁用 GPU 渲染
+chrome_options.add_argument("--window-size=1920,1080")  # 模擬螢幕解析度
+chrome_options.add_argument("--no-sandbox")  # 避免權限問題
+chrome_options.add_argument("--disable-dev-shm-usage")  # 避免共享內存不足
 
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-
+# 建立 WebDriver 管理實例
+driver_manager = WebDriverManager(chrome_options)
 
 
 @bot.event
@@ -67,11 +92,13 @@ async def on_message(message):
 # 定义一个 Slash 命令
 @bot.slash_command(name="給我游泳池票", description="索取台大游泳池票卷 QR Code ><")
 async def swimming_ticket(ctx: discord.ApplicationContext):
+    driver = driver_manager.get_driver()  # 獲取可用的 driver
     await get_ticket(bot, ctx, "游泳池", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name)
 
 # 定义一个 Slash 命令
 @bot.slash_command(name="給我健身中心票", description="索取台大健身中心票卷 QR Code ><")
 async def swimming_ticket(ctx: discord.ApplicationContext):
+    driver = driver_manager.get_driver()  # 獲取可用的 driver
     await get_ticket(bot, ctx, "健身中心", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name)
     
     

@@ -111,9 +111,8 @@ def logout(driver):
     try:
         if driver.session_id is None:
             raise WebDriverException("Driver 已經被關閉。")
-        
-        # 嘗試找到 "登出" 按鈕
-        logout_button = driver.find_element(By.LINK_TEXT, '登出')
+
+        logout_button = driver.find_element(By.XPATH, '//a[@title="登出"]')
         logout_button.click()
         time.sleep(1)
 
