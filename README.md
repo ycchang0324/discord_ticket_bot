@@ -54,6 +54,18 @@ The setting for discord bot is shown in the following picture.
    python main.py
    ```
 
+2. To prevent sudden occurence such as power failure or network disconnection, you can create .bat file and uses Task Scheduler, which is a Windows build-in tools to wake up the chatbot. The Task Scheduler can execute the code after starting up or once in a while.
+   ```sh
+   cd /d "the absolute directory of the repository in your computer"
+   call python main.py
+   REM pause
+   ```
+The example setting for task scheduler is shown in the following picture.
+![](examples/task_scheduler_setting_starting_up.png)
+![](examples/task_scheduler_setting_every_day.png)
+
+
+
 
 <!-- CONTACT -->
 ## Contact
