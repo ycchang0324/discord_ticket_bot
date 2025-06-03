@@ -23,6 +23,8 @@ your_account = os.getenv('ACCOUNT')  # NTU COOL 帳號
 your_password = os.getenv('PASSWORD')  # NTU COOL 密碼
 your_web_url = os.getenv('URL')  # 租借系統網址
 token = os.getenv('TOKEN')
+maintainer_env = os.getenv('MAINTAINER')
+bot_name_env = os.getenv('BOT_NAME')
 
 # 定義 WebDriver 管理類
 class WebDriverManager:
@@ -70,11 +72,11 @@ async def on_message(message):
     # 检测消息是否提及了机器人
     if bot.user in message.mentions:
         await message.channel.send(
-            f"""{message.author.mention} 你好！我是呆呆獸，很高興認識你 ▼・ᴥ・▼
+            f"""{message.author.mention} 你好！我是{bot_name_env}，很高興認識你 ▼・ᴥ・▼
 
 我將提供 **台大游泳池票** 以及** 台大健身中心票** 給你喔~
 
-在 **小幫手** 頻道中 (っ・Д・)っ
+在 **{target_channel_name}** 頻道中 (っ・Д・)っ
 
 你可以發送 **`/給我游泳池票`** 以索取台大游泳池 QR Code (=^-ω-^=)
 
@@ -119,7 +121,11 @@ async def ticket(ctx: discord.ApplicationContext):
             await ctx.followup.send("出錯了，請聯絡管理員")
             return
         
+        
         qrcode = discord.File(qrcode_path, filename="payment_qrcode.png")
+
+        #如果沒有付款碼，請把下面程式碼的註解消除，並註解掉上一行
+        #qrcode = discord.File(qrcode_path, filename="empty.png")
         
         # 發送消息並附加文件
         await ctx.followup.send(
@@ -143,7 +149,7 @@ async def ticket(ctx: discord.ApplicationContext):
 
 街口支付可以儲存下面的付款碼，再使用 APP 付款
 
-如果有其他問題，歡迎私訊 **45 張原嘉** (´･ω･`)
+如果有其他問題，歡迎私訊 **{maintainer_env}** (´･ω･`)
             """,
             file=qrcode,
             ephemeral=True

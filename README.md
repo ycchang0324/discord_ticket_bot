@@ -44,7 +44,15 @@ The setting for discord bot is shown in the following picture.
 (3) NTU account  
 (4) NTU password  
 (5) NTU rental system url: https://rent.pe.ntu.edu.tw/member/  
-(6) Discord bot token.  
+(6) Discord bot token.
+(7) Maintainer's Name
+(8) Bot Name
+
+8. Edit the payment message, which is in the function
+```python
+@bot.slash_command(name="help", description="呆呆獸怎麼用")
+```
+in main.py. Please notice that if the payment QR code is not needed,  please uncomment the code, which replace the QR code picture by empty picture.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
