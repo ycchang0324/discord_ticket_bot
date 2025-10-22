@@ -1,9 +1,9 @@
 import discord
 import asyncio
-from src.utility import log_to_file, login, logout, getImage, get_ticket_num, check_ticket_num
+from src.utility import log_to_file, login, logout, getImage, get_ticket_num, check_ticket_num, send_message_to_maintainer
 import os
 
-async def get_ticket(bot, ctx, category, driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name):
+async def get_ticket(bot, ctx, category, driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env):
     
 
     sender_name = ctx.author.display_name
@@ -61,10 +61,13 @@ async def get_ticket(bot, ctx, category, driver, your_web_url, your_account, you
                 await ctx.interaction.edit_original_response(content=f"{sender_name} 已成功使用 {category} 票卷！ \n\n 再請你匯款或是街口支付了，詳細資訊可以發送 /help 來獲取喔", file=empty_pic)
                 ticket_num = ticket_num - 1
                 log_to_file(f"{sender_name} 成功使用 {category} QR Code，剩餘 {ticket_num} 張", usage_path)
+                send_message_to_maintainer(f"{sender_name} 成功使用 {category} QR Code，剩餘 {ticket_num} 張",int(maintainer_id_env))
 
             else:
                 await ctx.interaction.edit_original_response(content=f"{sender_name} 未使用 {category} QR Code，請重新生成><", file=empty_pic)
                 log_to_file(f"{sender_name} 未使用 {category} QR Code，剩餘 {ticket_num} 張", usage_path)
+                send_message_to_maintainer(f"{sender_name} 未使用 {category} QR Code，剩餘 {ticket_num} 張",int(maintainer_id_env))
+
 
 
         for channel_id, sent_message in  welcome_messages_dict.items():

@@ -164,13 +164,13 @@ async def on_message(message):
 @bot.slash_command(name="給我游泳池票", description="索取台大游泳池票卷 QR Code ><")
 async def swimming_ticket(ctx: discord.ApplicationContext):
     driver = driver_manager.get_driver()  # 獲取可用的 driver
-    await get_ticket(bot, ctx, "游泳池", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name)
+    await get_ticket(bot, ctx, "游泳池", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env)
 
 # 定义一个 Slash 命令
 @bot.slash_command(name="給我健身中心票", description="索取台大健身中心票卷 QR Code ><")
 async def swimming_ticket(ctx: discord.ApplicationContext):
     driver = driver_manager.get_driver()  # 獲取可用的 driver
-    await get_ticket(bot, ctx, "健身中心", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name)
+    await get_ticket(bot, ctx, "健身中心", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env)
     
     
 
