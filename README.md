@@ -46,7 +46,7 @@ The setting for discord bot is shown in the following picture.
 (5) NTU rental system url: https://rent.pe.ntu.edu.tw/member/  
 (6) Discord bot token.  
 (7) Maintainer's Name  
-(8) Maintainer's ID
+(8) Maintainer's ID  
 (9) Bot Name
 
 8. Edit the payment message
