@@ -212,9 +212,11 @@ async def ticket(ctx: discord.ApplicationContext):
 
 健身中心票卷費用：**25 元**
 
-在使用 QR Code 成功後，可以用 **街口支付** 或是 **轉帳**
+在使用 QR Code 成功後，可以用 **街口支付** 、 **Line Pay** 或是 **轉帳**
 
 轉帳資料：**(700) 中華郵政 00610490236328**
+
+Line pay 帳號 ID： **ycchang0324**
 
 請幫我在轉帳備註欄填上 **姓名** 或是 **Discord 暱稱** 喔
 
