@@ -81,6 +81,8 @@ The example setting for task scheduler is shown in the following picture.
 ![](examples/task_scheduler_setting_starting_up.png)
 ![](examples/task_scheduler_setting_every_day.png)
 
+You can use remote desktop connection sofeware(eg. TeamViewer, Anyviewer) to fix the failure condition manually.
+
 ## Maintainer's prompts
 
 The mainainer can send specific messages to the bot either privately or publicly.

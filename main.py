@@ -216,9 +216,9 @@ async def ticket(ctx: discord.ApplicationContext):
 
 轉帳資料：**(700) 中華郵政 00610490236328**
 
-Line pay 帳號 ID： **ycchang0324**
-
 請幫我在轉帳備註欄填上 **姓名** 或是 **Discord 暱稱** 喔
+
+Line pay 帳號 ID： **ycchang0324**
 
 街口支付可以儲存下面的付款碼，再使用 APP 付款
 
