@@ -24,6 +24,7 @@ your_password = os.getenv('PASSWORD')  # NTU COOL 密碼
 your_web_url = os.getenv('URL')  # 租借系統網址
 token = os.getenv('TOKEN')
 maintainer_env = os.getenv('MAINTAINER')
+maintainer_id_env = os.getenv('MAINTAINER_ID')
 bot_name_env = os.getenv('BOT_NAME')
 
 # 定義 WebDriver 管理類
@@ -82,12 +83,80 @@ async def on_message(message):
 
 或是發送 **`/給我健身中心票`** 以索取台大健身中心 QR Code ฅ^•ﻌ•^ฅ
 
+請在給泳驗刷票前就把 QR Code 生成好喔，不然泳驗可能會覺得很奇怪(◉３◉)
+
 也可以發送 **`/help`** 來得到更多資訊喔 (´･ω･`)
 
 運動真的很開心呢，希望能跟大家一起開心游泳和健身 (^_っ^)
             """
         )
 
+    # 2. 檢查訊息作者是否為特定使用者
+    if int(message.author.id) == int(maintainer_id_env):
+        
+        # 3. 檢查訊息內容是否與特定觸發訊息相符 (不區分大小寫)
+        # 使用 .strip().lower() 處理前後空白和大小寫
+        if message.content.strip().lower() == "welcome":
+            
+            # 4. 取得目標頻道
+            for channel_id in target_channel_ids:
+                channel = bot.get_channel(int(channel_id))
+                if channel :
+                    await channel.send(f"""你好！我是{bot_name_env}，很高興認識你 ▼・ᴥ・▼
+
+我將提供 **台大游泳池票** 以及** 台大健身中心票** 給你喔~
+
+在 **{target_channel_name}** 頻道中 (っ・Д・)っ
+
+你可以發送 **`/給我游泳池票`** 以索取台大游泳池 QR Code (=^-ω-^=)
+
+或是發送 **`/給我健身中心票`** 以索取台大健身中心 QR Code ฅ^•ﻌ•^ฅ
+
+小小的提醒~~請在給泳驗刷票前就把 QR Code 生成好喔，不然泳驗可能會覺得很奇怪(◉３◉)
+
+也可以發送 **`/help`** 來得到更多資訊喔 (´･ω･`)
+
+運動真的很開心呢，希望能跟大家一起開心游泳和健身 (^_っ^)
+            """
+        )
+                else:
+                    print(f'無法找到頻道 {channel_id}') 
+
+# 3. 檢查訊息內容是否與特定觸發訊息相符 (不區分大小寫)
+        # 使用 .strip().lower() 處理前後空白和大小寫
+        if message.content.strip().lower() == "swimming":
+            # 4. 取得目標頻道
+            for channel_id in target_channel_ids:
+                channel = bot.get_channel(int(channel_id))
+                if channel :
+                    await channel.send(f"""呆呆獸的游泳池票卷補足了喔喔好開心 ><
+            """
+        )
+                else:
+                    print(f'無法找到頻道 {channel_id}') 
+                    
+                    
+        if message.content.strip().lower() == "gym":
+             # 4. 取得目標頻道
+            for channel_id in target_channel_ids:
+                channel = bot.get_channel(int(channel_id))
+                if channel :
+                    await channel.send(f"""呆呆獸的健身中心票卷補足了喔喔好開心 ><
+            """
+        )
+                else:
+                    print(f'無法找到頻道 {channel_id}') 
+                    
+        if message.content.strip().lower() == "fixed":
+             # 4. 取得目標頻道
+            for channel_id in target_channel_ids:
+                channel = bot.get_channel(int(channel_id))
+                if channel :
+                    await channel.send(f"""呆呆獸回復正常了喔可以呼叫我了喔 ฅ^•ﻌ•^ฅ
+            """
+        )
+                else:
+                    print(f'無法找到頻道 {channel_id}') 
     # 处理其他命令
     await bot.process_commands(message)
 
@@ -136,6 +205,8 @@ async def ticket(ctx: discord.ApplicationContext):
 **發送 `/給我健身中心票`** 以索取台大健身中心 QR Code
 
 **QR Code** 請在三分鐘之內使用
+
+請在給泳驗刷票前就把 QR Code 生成好喔，不然泳驗可能會覺得很奇怪(◉３◉)
 
 台大游泳池票卷費用：**30 元**
 

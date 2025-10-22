@@ -46,7 +46,8 @@ The setting for discord bot is shown in the following picture.
 (5) NTU rental system url: https://rent.pe.ntu.edu.tw/member/  
 (6) Discord bot token.  
 (7) Maintainer's Name  
-(8) Bot Name
+(8) Maintainer's ID
+(9) Bot Name
 
 8. Edit the payment message
 ```python
@@ -80,8 +81,37 @@ The example setting for task scheduler is shown in the following picture.
 ![](examples/task_scheduler_setting_starting_up.png)
 ![](examples/task_scheduler_setting_every_day.png)
 
+## Maintainer's prompts
 
+The mainainer can send specific messages to the bot either privately or publicly.
 
+1.    
+```sh
+   welcome
+```
+
+The bot will send the welcome message to the channel.
+
+2.    
+```sh
+   swimming
+```
+
+The bot will send the message that the swimming tickets is full.
+
+3.    
+```sh
+   gym
+```
+
+The bot will send the message that the gym tickets is full.
+
+4.    
+```sh
+   fixed
+```
+
+The bot will send the message that the bot has been fixed.
 
 <!-- CONTACT -->
 ## Contact
