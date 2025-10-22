@@ -11,6 +11,7 @@ from datetime import datetime
 
 
 
+
 # 獲取當前 Python 檔案的路徑
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -220,19 +221,5 @@ def check_ticket_num(driver, ticket_num, category):
         counter += 1
     return success
 
-async def send_message_to_maintainer(message, user):
-    try:
-        
-        if user:
-            # 2. 對 User 物件使用 send 方法發送私訊
-            await user.send(message)
-            print(f"成功發送私訊給 {user.name} ({user})")
-        else:
-            print(f"找不到 ID 為 {user} 的使用者。")
-
-    except discord.Forbidden:
-        # 如果使用者設定了隱私不接收來自非朋友的私訊，會拋出 Forbidden 錯誤
-        print(f"無法發送私訊給 ID 為 {user} 的使用者，可能因為隱私設定阻擋。")
-    except Exception as e:
-        print(f"發送私訊時發生錯誤: {e}")
-    # --- 私訊發送邏輯結束 ---
+    
+    
