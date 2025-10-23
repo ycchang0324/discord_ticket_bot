@@ -208,7 +208,9 @@ def get_ticket_num(driver, category):
 def check_ticket_num(driver, ticket_num, category):
     success = False
     counter = 0
-    while counter < 20:
+    TIMEOUT_SECONDS = 5 * 60  # 5 分鐘
+    start_time = time.time()
+    while counter < 20 and (time.time() - start_time) < TIMEOUT_SECONDS:
         time.sleep(10)
         driver.refresh()
         system_ticket_num = get_ticket_num(driver, category)
@@ -219,6 +221,7 @@ def check_ticket_num(driver, ticket_num, category):
             success = True
             break
         counter += 1
+        print(f"現在的 counter: {counter}")
     return success
 
     
