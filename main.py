@@ -23,7 +23,6 @@ your_account = os.getenv('ACCOUNT')  # NTU COOL 帳號
 your_password = os.getenv('PASSWORD')  # NTU COOL 密碼
 your_web_url = os.getenv('URL')  # 租借系統網址
 token = os.getenv('TOKEN')
-maintainer_env = os.getenv('MAINTAINER')
 maintainer_id_env = os.getenv('MAINTAINER_ID')
 bot_name_env = os.getenv('BOT_NAME')
 
@@ -102,7 +101,7 @@ async def on_message(message):
             for channel_id in target_channel_ids:
                 channel = bot.get_channel(int(channel_id))
                 if channel :
-                    await channel.send(f"""你好！我是{bot_name_env}，很高興認識你 ▼・ᴥ・▼
+                    await channel.send(f"""我是{bot_name_env}，很高興認識你 ▼・ᴥ・▼
 
 我將提供 **台大游泳池票** 以及** 台大健身中心票** 給你喔~
 
@@ -124,7 +123,7 @@ async def on_message(message):
 
 # 3. 檢查訊息內容是否與特定觸發訊息相符 (不區分大小寫)
         # 使用 .strip().lower() 處理前後空白和大小寫
-        if message.content.strip().lower() == "swimming":
+        if message.content.strip().lower() == "swim":
             # 4. 取得目標頻道
             for channel_id in target_channel_ids:
                 channel = bot.get_channel(int(channel_id))
@@ -212,7 +211,7 @@ async def ticket(ctx: discord.ApplicationContext):
 
 健身中心票卷費用：**25 元**
 
-在使用 QR Code 成功後，可以用 **街口支付** 、 **Line Pay** 或是 **轉帳**
+在使用 QR Code 成功後，可以用 **轉帳** 、 **Line Pay** 或是 **街口支付** 
 
 轉帳資料：**(700) 中華郵政 00610490236328**
 
@@ -222,7 +221,7 @@ Line pay 帳號 ID： **ycchang0324**
 
 街口支付可以儲存下面的付款碼，再使用 APP 付款
 
-如果有其他問題，歡迎私訊 **{maintainer_env}** (´･ω･`)
+如果有其他問題，歡迎私訊 **張原嘉** (´･ω･`)
             """,
             file=qrcode,
             ephemeral=True
