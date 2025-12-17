@@ -8,7 +8,7 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
     # 1. 全域狀態檢查
     if bot.is_ticket_generating:
         # 如果已經 defer 過，要用 followup
-        await interaction.response.send_message("⚠️ 目前已有票卷正在生成中，請稍候約 5 分鐘再試。", ephemeral=True)
+        await interaction.followup.send("⚠️ 目前已有票卷正在生成中，請稍候約 5 分鐘再試。", ephemeral=True)
         return
 
     # interaction.user 取代 ctx.author
@@ -22,7 +22,7 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
             bot.is_ticket_generating = True
             
             # 使用 interaction.response.send_message
-            await interaction.response.send_message(f"{sender_name} 您好，請稍等 15 秒~", ephemeral=True)
+            await interaction.followup.send(f"{sender_name} 您好，請稍等 15 秒~", ephemeral=True)
             
             welcome_messages_dict = {}
             for channel_id in target_channel_ids:
@@ -33,23 +33,26 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
                 else:
                     print(f'無法找到頻道 {channel_id}')    
             
-            if not login(driver, your_web_url, your_account, your_password):
+            if not await login(driver, your_web_url, your_account, your_password):
                 # 這裡改用 followup 因為 response 已經用過了
-                await interaction.followup.send("登入系統時出現問題", ephemeral=True)
+                if channel:
+                    await channel.send("登入系統時出現問題")
                 return
             
-            getImage(driver, category)
+            await getImage(driver, category)
 
             res_num = get_ticket_num(driver, category)
             if res_num is None:
-                await interaction.followup.send("獲取票卷張數時出現問題", ephemeral=True)
+                if channel:
+                    await channel.send("獲取票卷張數時出現問題")
                 return
             else:        
                 ticket_num = int(res_num)
 
             # 確認票卷數量
             if ticket_num < 2:
-                await interaction.followup.send(f"{category} 票卷不足，請加值><", ephemeral=True)
+                channel = bot.get_channel(int(interaction.channel_id))
+                if channel: await channel.send(f"{category} 票卷不足，請加值><")
             else:
                 if ticket_num < 6:
                     # 頻道廣播訊息依然用 channel.send
@@ -68,7 +71,8 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
 
                 success = await check_ticket_num(driver, ticket_num, category)
                 if success is None:
-                    await interaction.followup.send("獲取票卷張數時出現問題", ephemeral=True)
+                    if channel:
+                        await channel.send("獲取票卷張數時出現問題")
                     return
                 
                 usage_path = os.path.join(base_dir, 'log', 'usage.txt')
@@ -100,7 +104,7 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
             for sent_message in welcome_messages_dict.values():
                 await sent_message.delete()
             
-            if not logout(driver):
+            if not await logout(driver):
                 print("登出系統時出現問題")
 
             finish_messages_dict = {}
@@ -118,7 +122,8 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
             print(f"發生錯誤: {e}")
             # 如果發生錯誤，確保能透過 followup 告知使用者
             try:
-                await interaction.followup.send("程式執行中發生錯誤，請聯絡管理員。", ephemeral=True)
+                if channel:
+                    await channel.send("程式執行中發生錯誤，請聯絡管理員。")
             except:
                 pass
         finally:

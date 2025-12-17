@@ -59,7 +59,7 @@ def log_to_file(data, file_path):
 
 
 
-def login(driver, url, account, password):
+async def login(driver, url, account, password):
     success = True
     try:
         if driver.session_id is None:
@@ -85,7 +85,7 @@ def login(driver, url, account, password):
         login_btn.click()
 
         # 等待並處理可能的彈出框
-        time.sleep(1)
+        await asyncio.sleep(1)
         alert = Alert(driver)
         alert.accept()
 
@@ -117,7 +117,7 @@ def login(driver, url, account, password):
 
     return success
 
-def logout(driver):
+async def logout(driver):
     success = True
     try:
         if driver.session_id is None:
@@ -125,7 +125,7 @@ def logout(driver):
 
         logout_button = driver.find_element(By.XPATH, '//a[@title="登出"]')
         logout_button.click()
-        time.sleep(1)
+        await asyncio.sleep(1)
 
         # 處理登出後的彈出警告框
         alert = Alert(driver)
@@ -174,11 +174,11 @@ def crop_center(image_path, output_path, crop_width, crop_height):
     # 保存裁剪後的圖像
     cropped_img.save(output_path)
 
-def getImage(driver, category):   
+async def getImage(driver, category):   
     qr_button = driver.find_element(By.XPATH, f'//div[contains(text(), "{category}")]//following::button[text()="進場使用 ( QRCode )"][1]')
     qr_button.click()
     
-    time.sleep(1)
+    await asyncio.sleep(1)
     
     driver.switch_to.frame(driver.find_element(By.TAG_NAME, 'iframe'))
     

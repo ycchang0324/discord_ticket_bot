@@ -203,24 +203,32 @@ async def on_message(message):
     # 处理其他命令
     await bot.process_commands(message)
 
-# 定义一个 Slash 命令
 @bot.tree.command(name="給我游泳池票", description="索取台大游泳池票卷 QR Code ><")
 async def swimming_ticket(interaction: discord.Interaction):
-    try:
-        driver = driver_manager.get_driver()  # 獲取可用的 driver
-        await get_ticket(bot, interaction, "游泳池", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env)
-    except BrowserCriticalError:
-        print("💥 偵測到致命錯誤，通知管理員並重啟容器...")
-        # 可以在這裡加一個發送 Discord 訊息給管理員的邏輯
-        import os
-        os._exit(1) # 強制結束程式，觸發 Docker restart
+    # 第一步：立即 defer，這會給機器人 15 分鐘的處理時間
+    await interaction.response.defer(ephemeral=True)
+    
+    # 使用 asyncio.create_task 讓它在背景跑，不阻塞其他指令進入
+    asyncio.create_task(
+        handle_ticket_request(interaction, "游泳池")
+    )
 
-# 定义一个 Slash 命令
+# 修改健身中心指令
 @bot.tree.command(name="給我健身中心票", description="索取台大健身中心票卷 QR Code ><")
 async def gym_ticket(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
+    
+    asyncio.create_task(
+        handle_ticket_request(interaction, "健身中心")
+    )
+
+# 定义一个 Slash 命令
+# 建立一個統一的處理函式
+async def handle_ticket_request(interaction: discord.Interaction, category: str):
     try:
         driver = driver_manager.get_driver()  # 獲取可用的 driver
-        await get_ticket(bot, interaction, "健身中心", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env)
+        
+        await get_ticket(bot, interaction, category, driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env)
     except BrowserCriticalError:
         print("💥 偵測到致命錯誤，通知管理員並重啟容器...")
         # 可以在這裡加一個發送 Discord 訊息給管理員的邏輯

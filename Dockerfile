@@ -29,6 +29,24 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
+# 切換到 root 權限進行安裝
+USER root
+
+# 安裝中文字型與字型管理工具
+RUN apt-get update && apt-get install -y \
+    fonts-wqy-microhei \
+    fonts-wqy-zenhei \
+    fontconfig \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# 更新字型快取，確保系統抓到新字型
+RUN fc-cache -fv
+
+# 設定語系環境變數為 UTF-8
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
 # 設定工作目錄
 WORKDIR /app
 COPY . /app
