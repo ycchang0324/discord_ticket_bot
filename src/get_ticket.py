@@ -3,126 +3,128 @@ import asyncio
 from src.utility import log_to_file, login, logout, getImage, get_ticket_num, check_ticket_num
 import os
 
-async def get_ticket(bot, ctx, category, driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env):
+async def get_ticket(bot, interaction: discord.Interaction, category, driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env):
     
+    # 1. 全域狀態檢查
+    if bot.is_ticket_generating:
+        # 如果已經 defer 過，要用 followup
+        await interaction.response.send_message("⚠️ 目前已有票卷正在生成中，請稍候約 5 分鐘再試。", ephemeral=True)
+        return
 
-    sender_name = ctx.author.display_name
+    # interaction.user 取代 ctx.author
+    sender_name = interaction.user.display_name
 
-    if str(ctx.channel.id) in target_channel_ids:
+    # interaction.channel_id 取代 ctx.channel.id
+    if str(interaction.channel_id) in target_channel_ids:
         
-
-        await ctx.respond(f"{sender_name} 您好，請稍等 15 秒~", ephemeral=True)
-        welcome_messages_dict = {}
-        for channel_id in target_channel_ids:
-        # 獲取頻道對象並存入字典中
-            channel = bot.get_channel(int(channel_id))
-            if channel :
-                # 發送訊息並儲存訊息對象
-                sent_message = await channel.send("努力生成票卷 QR Code 中~~請先不要傳訊息給我，不然我會不理你，稍等大概五分鐘喔！")
-                welcome_messages_dict[int(channel_id)] = sent_message
-            else:
-                print(f'無法找到頻道 {channel_id}')    
-        
-        if not login(driver, your_web_url, your_account, your_password):
-            await ctx.channel.send("登入系統時出現問題")
-            return
-        
-        getImage(driver, category)
-
-        if get_ticket_num(driver,category) == None:
-            await ctx.channel.send("獲取票卷張數時出現問題")
-            return
-        else:        
-            ticket_num = int(get_ticket_num(driver, category))
-
-        #確認票卷數量
-        if ticket_num < 2:
-            await ctx.channel.send(f"{category} 票卷不足，請加值><")
-        else:
-            if ticket_num < 6:
-                await ctx.channel.send(f"{category} 票卷即將不足，請加值><")
+        try:
+            # 2. 鎖定狀態
+            bot.is_ticket_generating = True
             
+            # 使用 interaction.response.send_message
+            await interaction.response.send_message(f"{sender_name} 您好，請稍等 15 秒~", ephemeral=True)
             
-            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            image_path = os.path.join(base_dir, 'img', 'screenshot_crop.png')
-            empty_path = os.path.join(base_dir, 'img', 'empty.png')
-            picture = discord.File(image_path, filename="screenshot_crop.png")
-            empty_pic = discord.File(empty_path, filename="empty.png")
+            welcome_messages_dict = {}
+            for channel_id in target_channel_ids:
+                channel = bot.get_channel(int(channel_id))
+                if channel:
+                    sent_message = await channel.send("努力生成票卷 QR Code 中~~請先不要傳訊息給我，不然我會不理你，稍等大概五分鐘喔！")
+                    welcome_messages_dict[int(channel_id)] = sent_message
+                else:
+                    print(f'無法找到頻道 {channel_id}')    
             
-            await ctx.interaction.edit_original_response(content=f"已傳送 {category} QR Code，請在三分鐘之內使用喔", file=picture)
-
-            success = check_ticket_num(driver, ticket_num, category)
-            if success == None:
-                await ctx.channel.send("獲取票卷張數時出現問題")
+            if not login(driver, your_web_url, your_account, your_password):
+                # 這裡改用 followup 因為 response 已經用過了
+                await interaction.followup.send("登入系統時出現問題", ephemeral=True)
                 return
             
-            usage_path = os.path.join(base_dir, 'log', 'usage.txt')
-            user = await bot.fetch_user(int(maintainer_id_env))
+            getImage(driver, category)
 
-            if success:
-                await ctx.interaction.edit_original_response(content=f"{sender_name} 已成功使用 {category} 票卷！ \n\n 再請你匯款或是街口支付了，詳細資訊可以發送 /help 來獲取喔", file=empty_pic)
-                ticket_num = ticket_num - 1
-                log_to_file(f"{sender_name} 成功使用 {category} QR Code，剩餘 {ticket_num} 張", usage_path)
+            res_num = get_ticket_num(driver, category)
+            if res_num is None:
+                await interaction.followup.send("獲取票卷張數時出現問題", ephemeral=True)
+                return
+            else:        
+                ticket_num = int(res_num)
+
+            # 確認票卷數量
+            if ticket_num < 2:
+                await interaction.followup.send(f"{category} 票卷不足，請加值><", ephemeral=True)
+            else:
+                if ticket_num < 6:
+                    # 頻道廣播訊息依然用 channel.send
+                    channel = bot.get_channel(int(interaction.channel_id))
+                    if channel: await channel.send(f"{category} 票卷即將不足，請加值><")
                 
-                # 傳送使用資訊給維護者
-                try:
+                base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                image_path = os.path.join(base_dir, 'img', 'screenshot_crop.png')
+                empty_path = os.path.join(base_dir, 'img', 'empty.png')
+                
+                picture = discord.File(image_path, filename="screenshot_crop.png")
+                empty_pic = discord.File(empty_path, filename="empty.png")
+                
+                # 更新原本的延遲訊息 (edit_original_response)
+                await interaction.edit_original_response(content=f"已傳送 {category} QR Code，請在三分鐘之內使用喔", attachments=[picture])
+
+                success = await check_ticket_num(driver, ticket_num, category)
+                if success is None:
+                    await interaction.followup.send("獲取票卷張數時出現問題", ephemeral=True)
+                    return
+                
+                usage_path = os.path.join(base_dir, 'log', 'usage.txt')
+                user = await bot.fetch_user(int(maintainer_id_env))
+
+                if success:
+                    # 更新訊息為成功 (注意 attachments 傳入空列表或新圖片)
+                    await interaction.edit_original_response(content=f"{sender_name} 已成功使用 {category} 票卷！ \n\n 再請你匯款或是街口支付了，詳細資訊可以發送 /help 來獲取喔", attachments=[empty_pic])
+                    ticket_num = ticket_num - 1
+                    log_to_file(f"{sender_name} 成功使用 {category} QR Code，剩餘 {ticket_num} 張", usage_path)
+                    
                     if user:
-                        # 2. 對 User 物件使用 send 方法發送私訊
-                        await user.send(f"{sender_name} 成功使用 {category} QR Code，剩餘 {ticket_num} 張")
-                        print(f"成功發送私訊給 {user.name} ({user})")
-                    else:
-                        print(f"找不到 ID 為 {user} 的使用者。")
+                        try:
+                            await user.send(f"{sender_name} 成功使用 {category} QR Code，剩餘 {ticket_num} 張")
+                        except Exception as e:
+                            print(f"私訊失敗: {e}")
 
-                except discord.Forbidden:
-                    # 如果使用者設定了隱私不接收來自非朋友的私訊，會拋出 Forbidden 錯誤
-                    print(f"無法發送私訊給 ID 為 {user} 的使用者，可能因為隱私設定阻擋。")
-                except Exception as e:
-                    print(f"發送私訊時發生錯誤: {e}")
-                # --- 私訊發送邏輯結束 ---
+                else:
+                    await interaction.edit_original_response(content=f"{sender_name} 未使用 {category} QR Code，請重新生成><", attachments=[empty_pic])
+                    log_to_file(f"{sender_name} 未使用 {category} QR Code，剩餘 {ticket_num} 張", usage_path)
 
-            else:
-                await ctx.interaction.edit_original_response(content=f"{sender_name} 未使用 {category} QR Code，請重新生成><", file=empty_pic)
-                log_to_file(f"{sender_name} 未使用 {category} QR Code，剩餘 {ticket_num} 張", usage_path)
-
-                # 傳送使用資訊給維護者
-                try:
                     if user:
-                        # 2. 對 User 物件使用 send 方法發送私訊
-                        await user.send(f"{sender_name} 未使用 {category} QR Code，剩餘 {ticket_num} 張")
-                        print(f"成功發送私訊給 {user.name} ({user})")
-                    else:
-                        print(f"找不到 ID 為 {user} 的使用者。")
+                        try:
+                            await user.send(f"{sender_name} 未使用 {category} QR Code，剩餘 {ticket_num} 張")
+                        except Exception as e:
+                            print(f"私訊失敗: {e}")
 
-                except discord.Forbidden:
-                    # 如果使用者設定了隱私不接收來自非朋友的私訊，會拋出 Forbidden 錯誤
-                    print(f"無法發送私訊給 ID 為 {user} 的使用者，可能因為隱私設定阻擋。")
-                except Exception as e:
-                    print(f"發送私訊時發生錯誤: {e}")
-                # --- 私訊發送邏輯結束 ---
+            # 清理 welcome 訊息
+            for sent_message in welcome_messages_dict.values():
+                await sent_message.delete()
+            
+            if not logout(driver):
+                print("登出系統時出現問題")
 
+            finish_messages_dict = {}
+            for channel_id in target_channel_ids:
+                channel = bot.get_channel(int(channel_id))
+                if channel:
+                    sent_message = await channel.send("結束生成。可以再次呼喚我了喔")
+                    finish_messages_dict[int(channel_id)] = sent_message
 
+            await asyncio.sleep(60)
+            for sent_message in finish_messages_dict.values():
+                await sent_message.delete()
 
-        for channel_id, sent_message in  welcome_messages_dict.items():
-            await sent_message.delete()
-        
-        if not logout(driver):
-            await ctx.channel.send("登出系統時出現問題")
-
-        finish_messages_dict = {}
-        for channel_id in target_channel_ids:
-        # 獲取頻道對象並存入字典中
-            channel = bot.get_channel(int(channel_id))
-            if channel :
-                # 發送訊息並儲存訊息對象
-                sent_message = await channel.send("結束生成。可以再次呼喚我了喔")
-                finish_messages_dict[int(channel_id)] = sent_message
-            else:
-                print(f'無法找到頻道 {channel_id}')  
-
-        await asyncio.sleep(60)
-        for channel_id, sent_message in  finish_messages_dict.items():
-            await sent_message.delete()
-        
+        except Exception as e:
+            print(f"發生錯誤: {e}")
+            # 如果發生錯誤，確保能透過 followup 告知使用者
+            try:
+                await interaction.followup.send("程式執行中發生錯誤，請聯絡管理員。", ephemeral=True)
+            except:
+                pass
+        finally:
+            # 5. 無論如何都解鎖
+            bot.is_ticket_generating = False
         
     else:
-        await ctx.respond(f"請在 **{target_channel_name}** 頻道中發送 **/給我{category}票** 以索取 {category} QR Code 喔", ephemeral=True)
+        # 頻道不對的回應
+        await interaction.response.send_message(f"請在 **{target_channel_name}** 頻道中發送 **/給我{category}票** 以索取 {category} QR Code 喔", ephemeral=True)

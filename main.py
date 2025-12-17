@@ -2,6 +2,7 @@
 import discord
 # 導入commands指令模組
 from discord.ext import commands
+from discord import app_commands 
 import os
 
 from selenium import webdriver
@@ -13,7 +14,24 @@ from selenium.webdriver.chrome.options import Options
 from src.get_ticket import get_ticket
 from dotenv import load_dotenv
 
-bot = commands.Bot(command_prefix="!", intents=discord.Intents.default())
+import time
+from pathlib import Path
+import asyncio
+
+# 1. 建立 Bot 類別來處理同步 (這樣最穩)
+class MyBot(commands.Bot):
+    def __init__(self):
+        intents = discord.Intents.default()
+        intents.message_content = True  # 確保可以讀取訊息 (on_message 需要)
+        super().__init__(command_prefix="!", intents=intents)
+
+    async def setup_hook(self):
+        # 這行是關鍵：將斜線指令同步到 Discord 伺服器
+        await self.tree.sync()
+        print(f"Slash 指令同步完成！")
+
+bot = MyBot()
+bot.is_ticket_generating = False
 
 # 載入 .env 檔案中的環境變數
 load_dotenv()
@@ -26,24 +44,32 @@ token = os.getenv('TOKEN')
 maintainer_id_env = os.getenv('MAINTAINER_ID')
 bot_name_env = os.getenv('BOT_NAME')
 
-# 定義 WebDriver 管理類
 class WebDriverManager:
     def __init__(self, options):
         self.options = options
-        self.driver = self.create_driver()
+        self.driver = None # 延遲初始化，等真正需要或 healthcheck 時再建立
 
     def create_driver(self):
-        # 建立新的 WebDriver 實例
-        return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=self.options)
+        print("正在啟動新的 Chrome 實例...")
+        # 這裡不需要 ChromeDriverManager，因為 Dockerfile 已經裝好固定路徑的 Chrome
+        return webdriver.Chrome(options=self.options)
 
     def get_driver(self):
-        try:
-            # 嘗試使用當前的 WebDriver
-            self.driver.title  # 檢查 driver 是否存活
-        except Exception:
-            # 如果 driver 不可用，重新創建
-            self.driver.quit()
+        if self.driver is None:
             self.driver = self.create_driver()
+            return self.driver
+        
+        try:
+            # 檢查 driver 是否還能通訊
+            _ = self.driver.window_handles 
+        except Exception:
+            print("偵測到 WebDriver 失效，嘗試重啟...")
+            try:
+                self.driver.quit()
+            except:
+                pass
+            self.driver = self.create_driver()
+            
         return self.driver
 
 # 初始化 Selenium WebDriver 選項
@@ -58,11 +84,32 @@ chrome_options.add_argument("--disable-dev-shm-usage")  # 避免共享內存不�
 driver_manager = WebDriverManager(chrome_options)
 
 
+async def health_check_task():
+    """獨立的背景任務，每分鐘執行一次"""
+    while True:
+        try:
+            # 1. 嘗試與 WebDriver 通訊，確認 Chrome 是否崩潰
+            # 即使 get_ticket 正在運行，這裡獲取同一個 driver 實例通常也能讀取屬性
+            driver = driver_manager.get_driver()
+            _ = driver.title  # 輕量檢查
+            
+            # 2. 如果沒噴錯，更新心跳檔案
+            with open("/tmp/heartbeat", "w") as f:
+                f.write(str(time.time()))
+            
+        except Exception as e:
+            # 如果 Chrome 真的卡死了，這裡會噴錯，就不會更新檔案
+            print(f"Healthcheck 偵測到異常: {e}")
+            
+        # 每 60 秒跑一次檢查
+        await asyncio.sleep(60)
+
+# 在 on_ready 加入
 @bot.event
-# 當機器人完成啟動
 async def on_ready():
-    print(f"目前登入身份 --> {bot.user}")
-    
+    print(f"{bot.user} 已上線")
+    bot.loop.create_task(health_check_task())
+
 @bot.event
 async def on_message(message):
     # 防止机器人回复自己
@@ -160,24 +207,24 @@ async def on_message(message):
     await bot.process_commands(message)
 
 # 定义一个 Slash 命令
-@bot.slash_command(name="給我游泳池票", description="索取台大游泳池票卷 QR Code ><")
-async def swimming_ticket(ctx: discord.ApplicationContext):
+@bot.tree.command(name="給我游泳池票", description="索取台大游泳池票卷 QR Code ><")
+async def swimming_ticket(interaction: discord.Interaction):
     driver = driver_manager.get_driver()  # 獲取可用的 driver
-    await get_ticket(bot, ctx, "游泳池", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env)
+    await get_ticket(bot, interaction, "游泳池", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env)
 
 # 定义一个 Slash 命令
-@bot.slash_command(name="給我健身中心票", description="索取台大健身中心票卷 QR Code ><")
-async def swimming_ticket(ctx: discord.ApplicationContext):
+@bot.tree.command(name="給我健身中心票", description="索取台大健身中心票卷 QR Code ><")
+async def gym_ticket(interaction: discord.Interaction):
     driver = driver_manager.get_driver()  # 獲取可用的 driver
-    await get_ticket(bot, ctx, "健身中心", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env)
+    await get_ticket(bot, interaction, "健身中心", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env)
     
     
 
-@bot.slash_command(name="help", description="呆呆獸怎麼用")
-async def ticket(ctx: discord.ApplicationContext):
-    if str(ctx.channel.id) in target_channel_ids:
+@bot.tree.command(name="help", description="呆呆獸怎麼用")
+async def ticket(interaction: discord.Interaction):
+    if str(interaction.channel_id) in target_channel_ids:
         # 告訴 Discord 正在處理，延遲回應
-        await ctx.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=True)
 
         qrcode_path = os.path.join('img', 'payment_qrcode.png')
         
@@ -186,7 +233,7 @@ async def ticket(ctx: discord.ApplicationContext):
             qrcode_path = os.path.join('img', 'payment_qrcode_example.png')
         
         if not os.path.exists(qrcode_path):
-            await ctx.followup.send("出錯了，請聯絡管理員")
+            await interaction.followup.send("出錯了，請聯絡管理員")
             return
         
         
@@ -196,7 +243,7 @@ async def ticket(ctx: discord.ApplicationContext):
         #qrcode = discord.File(qrcode_path, filename="empty.png")
         
         # 發送消息並附加文件
-        await ctx.followup.send(
+        await interaction.followup.send(
             f"""請在 **{target_channel_name}** 頻道中
 
 **發送 `/給我游泳池票`** 以索取台大游泳池 QR Code
@@ -227,6 +274,6 @@ Line pay 帳號 ID： **ycchang0324**
             ephemeral=True
         )
     else:
-        await ctx.respond(f"請在 {target_channel_name} 頻道中發送 /help 來獲取使用說明以及匯款資訊喔~", ephemeral=True)
+        await interaction.response.send_message(f"請在 {target_channel_name} 頻道中發送 /help 來獲取使用說明以及匯款資訊喔~", ephemeral=True)
 
 bot.run(token)

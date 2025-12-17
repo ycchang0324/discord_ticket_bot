@@ -8,6 +8,7 @@ import os
 from PIL import Image
 import logging
 from datetime import datetime
+import asyncio
 
 
 
@@ -205,13 +206,13 @@ def get_ticket_num(driver, category):
         logging.error(f"票數文本格式錯誤或不存在: {e}")
         return None
 
-def check_ticket_num(driver, ticket_num, category):
+async def check_ticket_num(driver, ticket_num, category):
     success = False
     counter = 0
     TIMEOUT_SECONDS = 5 * 60  # 5 分鐘
     start_time = time.time()
     while counter < 20 and (time.time() - start_time) < TIMEOUT_SECONDS:
-        time.sleep(10)
+        await asyncio.sleep(10)
         driver.refresh()
         system_ticket_num = get_ticket_num(driver, category)
         if system_ticket_num == None:

@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  ticket-bot:
+    build: .
+    container_name: discord_ticket_bot
+    # 關鍵設定 1：掛掉、電腦重啟都會自動啟動
+    restart: always
+    # 關鍵設定 2：讀取環境變數檔案
+    env_file:
+      - .env
+    # 關鍵設定 3：如果有資料庫或 Log 檔案需要保存在桌機，可取消下方註解
+    volumes:
+      - ./log:/app/log      # 將主機的 log 資料夾對應到容器內的 /app/log
+      - ./img:/app/img      # 將主機的 img 資料夾對應到容器內的 /app/img
+
+    healthcheck:
+        # 檢查 heartbeat 檔案是否在 6 分鐘內更新過 (稍長於你的 5 分鐘最大等待時間)
+        test: ["CMD-SHELL", "find /tmp/heartbeat -mmin -6 | grep -q heartbeat || exit 1"]
+        interval: 2m       # 每 2 分鐘檢查一次
+        timeout: 30s       # 檢查指令如果卡住，30秒算超時
+        retries: 3         # 連續失敗 3 次 (即 6 分鐘) 才判定為 unhealthy
+        start_period: 1m   # 啟動後前 60 秒不計入檢查
