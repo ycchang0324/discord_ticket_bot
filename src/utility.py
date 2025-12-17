@@ -34,6 +34,9 @@ if not os.path.exists(error_path):
 logging.basicConfig(filename=error_path, level=logging.ERROR, 
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+class BrowserCriticalError(Exception):
+    """當 WebDriver 完全無法通訊或環境損壞時拋出"""
+    pass
 
 def log_to_file(data, file_path):
     # 獲取當前 Python 檔案的路徑
@@ -61,6 +64,7 @@ def login(driver, url, account, password):
     try:
         if driver.session_id is None:
             raise WebDriverException("Driver 已經被關閉。")
+
         # 導航到 URL
         driver.get(url)
         
@@ -89,14 +93,18 @@ def login(driver, url, account, password):
         # 記錄找不到元素的錯誤
         logging.error(f"登入過程中找不到元素: {e}")
         success = False
+
+        
     except TimeoutException as e:
         # 記錄超時錯誤
         logging.error(f"登入過程中操作超時: {e}")
         success = False
+        
     except UnexpectedAlertPresentException as e:
         # 記錄未預期的彈出框錯誤
         logging.error(f"未預期的彈出框: {e}")
         success = False
+        
     except WebDriverException as e:
         # 記錄 driver 被關閉或無法運行的錯誤
         logging.error(f"WebDriver 無法運行或已被關閉: {e}")
@@ -106,6 +114,7 @@ def login(driver, url, account, password):
         # 捕捉所有其他未知錯誤並記錄
         logging.error(f"登入過程中發生未知錯誤: {e}")
         success = False
+
     return success
 
 def logout(driver):
@@ -125,6 +134,7 @@ def logout(driver):
         # 記錄找不到登出按鈕的錯誤
         logging.error(f"找不到 '登出' 按鈕: {e}")
         success = False
+        
     except TimeoutException as e:
         # 記錄彈出框超時的錯誤
         logging.error(f"處理彈出框超時: {e}")

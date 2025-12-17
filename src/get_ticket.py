@@ -1,6 +1,6 @@
 import discord
 import asyncio
-from src.utility import log_to_file, login, logout, getImage, get_ticket_num, check_ticket_num
+from src.utility import log_to_file, login, logout, getImage, get_ticket_num, check_ticket_num, BrowserCriticalError
 import os
 
 async def get_ticket(bot, interaction: discord.Interaction, category, driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env):
@@ -114,7 +114,7 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
             for sent_message in finish_messages_dict.values():
                 await sent_message.delete()
 
-        except Exception as e:
+        except BrowserCriticalError as e:
             print(f"發生錯誤: {e}")
             # 如果發生錯誤，確保能透過 followup 告知使用者
             try:

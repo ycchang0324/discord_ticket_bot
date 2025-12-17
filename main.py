@@ -12,6 +12,7 @@ from selenium.webdriver.chrome.options import Options
 
 
 from src.get_ticket import get_ticket
+from src.utility import BrowserCriticalError
 from dotenv import load_dotenv
 
 import time
@@ -85,24 +86,20 @@ driver_manager = WebDriverManager(chrome_options)
 
 
 async def health_check_task():
-    """獨立的背景任務，每分鐘執行一次"""
+    """配合 Docker Healthcheck 使用"""
     while True:
         try:
-            # 1. 嘗試與 WebDriver 通訊，確認 Chrome 是否崩潰
-            # 即使 get_ticket 正在運行，這裡獲取同一個 driver 實例通常也能讀取屬性
+            # 檢查 Selenium 是否還活著
             driver = driver_manager.get_driver()
-            _ = driver.title  # 輕量檢查
+            _ = driver.title 
             
-            # 2. 如果沒噴錯，更新心跳檔案
+            # 更新心跳檔案
             with open("/tmp/heartbeat", "w") as f:
                 f.write(str(time.time()))
-            
-        except Exception as e:
-            # 如果 Chrome 真的卡死了，這裡會噴錯，就不會更新檔案
-            print(f"Healthcheck 偵測到異常: {e}")
-            
-        # 每 60 秒跑一次檢查
-        await asyncio.sleep(60)
+        except Exception:
+            print("Healthcheck 失敗，停止更新 Heartbeat...")
+            # 不更新檔案，Docker 會在幾分鐘後判定容器 Unhealthy 並重啟
+        await asyncio.sleep(30)
 
 # 在 on_ready 加入
 @bot.event
@@ -209,14 +206,26 @@ async def on_message(message):
 # 定义一个 Slash 命令
 @bot.tree.command(name="給我游泳池票", description="索取台大游泳池票卷 QR Code ><")
 async def swimming_ticket(interaction: discord.Interaction):
-    driver = driver_manager.get_driver()  # 獲取可用的 driver
-    await get_ticket(bot, interaction, "游泳池", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env)
+    try:
+        driver = driver_manager.get_driver()  # 獲取可用的 driver
+        await get_ticket(bot, interaction, "游泳池", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env)
+    except BrowserCriticalError:
+        print("💥 偵測到致命錯誤，通知管理員並重啟容器...")
+        # 可以在這裡加一個發送 Discord 訊息給管理員的邏輯
+        import os
+        os._exit(1) # 強制結束程式，觸發 Docker restart
 
 # 定义一个 Slash 命令
 @bot.tree.command(name="給我健身中心票", description="索取台大健身中心票卷 QR Code ><")
 async def gym_ticket(interaction: discord.Interaction):
-    driver = driver_manager.get_driver()  # 獲取可用的 driver
-    await get_ticket(bot, interaction, "健身中心", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env)
+    try:
+        driver = driver_manager.get_driver()  # 獲取可用的 driver
+        await get_ticket(bot, interaction, "健身中心", driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env)
+    except BrowserCriticalError:
+        print("💥 偵測到致命錯誤，通知管理員並重啟容器...")
+        # 可以在這裡加一個發送 Discord 訊息給管理員的邏輯
+        import os
+        os._exit(1) # 強制結束程式，觸發 Docker restart
     
     
 
