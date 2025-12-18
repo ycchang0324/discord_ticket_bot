@@ -5,10 +5,10 @@
 
 This repository is for NTU Lifeguard. The repo creates a chatbot, which is powered by Docker, Selenium and Discord API. By sending messages in specific Discord channel, the chatbot will generate QRCode for NTU swimming pool and NTU fitness center.
 
-### Usage Example
+## Usage Example
 ![](examples/usage.gif)
 
-### Usage 
+## Usage 
 1. The slash command will generate QR Code for NTU swimming pool
    ```sh
    /給我游泳池票
@@ -24,7 +24,7 @@ This repository is for NTU Lifeguard. The repo creates a chatbot, which is power
    /help
    ```
 
-### 🛠 Prerequisites
+## 🛠 Prerequisites
 
 Before setting up the project, please ensure you have the following installed:
 
@@ -34,36 +34,21 @@ Before setting up the project, please ensure you have the following installed:
 - [ ] **(Optional) Remote Desktop** Tools like **AnyDesk** or **TeamViewer** are useful if you need to manually restart or monitor the bot from a different location.
 
 
-### Installation
+## Installation
 
 1. Clone the repo
    ```sh
    git clone https://github.com/ycchang0324/discord_ticket_bot
    ```
 
-2. change directory to the folder
-   ```sh
-   cd discord_ticket_bot
-   ```
-
-3. build the image
-   ```sh
-   docker build --progress=plain --no-cache -t discord-ticket-bot .
-   ```
-
-4. run the container(every time you edit the code)
-   ```sh
-   docker-compose up -d --build
-   ```  
-
-5. Create a Discord chatbot, for more details please check [here](https://discord.com/developers/docs/intro).
+2. Create a Discord chatbot, for more details please check [here](https://discord.com/developers/docs/intro).
 
 The setting for discord bot is shown in the following picture.
 ![](examples/bot_setting.png)
 
-6. Add the payment QRCode as payment_qrcode.png in img folder.
+3. Add the payment QRCode as payment_qrcode.png in img folder.
 
-7. Create .env file, copy the text in .env.example and fill in  
+4. Create .env file, copy the text in .env.example and fill in  
 (1) Discord channel IDs(can be multiple, separated by colons)  
 (2) Discord channel name(only for main channel's name)    
 (3) NTU account  
@@ -73,7 +58,7 @@ The setting for discord bot is shown in the following picture.
 (7) Maintainer's ID  
 (8) Bot Name
 
-8. Edit the payment message
+5. Edit the payment message
 ```python
 await ctx.followup.send("...", file=qrcode, ephemeral=True)
 ```
@@ -86,6 +71,22 @@ in main.py. Please notice that if the payment QR code is not needed,  please rep
 qrcode = discord.File(qrcode_path, filename="empty.png")
 ```
 
+## Deployment
+
+1. change directory to the folder
+   ```sh
+   cd discord_ticket_bot
+   ```
+
+2. build the image
+   ```sh
+   docker build --progress=plain --no-cache -t discord-ticket-bot .
+   ```
+
+3. run the container(every time you edit the code)
+   ```sh
+   docker-compose up -d --build
+   ```  
 
 ## Maintainer's prompts
 
