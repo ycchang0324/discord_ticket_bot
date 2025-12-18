@@ -8,9 +8,31 @@ This repository is for NTU Lifeguard. The repo creates a chatbot, which is power
 ### Usage Example
 ![](examples/usage.gif)
 
+### Usage 
+1. The slash command will generate QR Code for NTU swimming pool
+   ```sh
+   /給我游泳池票
+   ```
+
+2. The slash command will generate QR Code for NTU gym
+   ```sh
+   /給我健身中心票
+   ```
+
+3. The slash command will generate the instruction of the bot for discord users.
+   ```sh
+   /help
+   ```
+
 ### Prerequisites
-* Docker installed.
-* WSL 2(for Windows OS)
+[ ] Docker - Download here
+
+Tip: Enable "Start Docker Desktop when you sign in" for better reliability.
+
+[ ] WSL 2 - Required for Windows users. Installation Guide
+
+[ ] (Optional) Remote Desktop - (e.g., AnyDesk, TeamViewer) Useful for manual restarts or remote monitoring.
+
 
 ### Installation
 
@@ -42,7 +64,7 @@ The setting for discord bot is shown in the following picture.
 6. Add the payment QRCode as payment_qrcode.png in img folder.
 
 7. Create .env file, copy the text in .env.example and fill in  
-(1) Discord channel IDs(can be multiple, separated by colons)
+(1) Discord channel IDs(can be multiple, separated by colons) 
 (2) Discord channel name(only for main channel's name)    
 (3) NTU account  
 (4) NTU password  
