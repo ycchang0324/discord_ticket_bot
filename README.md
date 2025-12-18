@@ -24,14 +24,14 @@ This repository is for NTU Lifeguard. The repo creates a chatbot, which is power
    /help
    ```
 
-### Prerequisites
-[ ] Docker - Download here
+### 🛠 Prerequisites
 
-Tip: Enable "Start Docker Desktop when you sign in" for better reliability.
+Before setting up the project, please ensure you have the following installed:
 
-[ ] WSL 2 - Required for Windows users. Installation Guide
-
-[ ] (Optional) Remote Desktop - (e.g., AnyDesk, TeamViewer) Useful for manual restarts or remote monitoring.
+- [ ] **[Docker](https://www.docker.com/products/docker-desktop/)** > **Tip:** It is highly recommended to enable **"Start Docker Desktop when you sign in"** in the settings to ensure the bot starts automatically with your system.
+- [ ] **WSL 2** (Windows Users Only)  
+  Required to run Docker containers efficiently on Windows. [Follow the official Installation Guide](https://learn.microsoft.com/en-us/windows/wsl/install).
+- [ ] **(Optional) Remote Desktop** Tools like **AnyDesk** or **TeamViewer** are useful if you need to manually restart or monitor the bot from a different location.
 
 
 ### Installation
@@ -64,7 +64,7 @@ The setting for discord bot is shown in the following picture.
 6. Add the payment QRCode as payment_qrcode.png in img folder.
 
 7. Create .env file, copy the text in .env.example and fill in  
-(1) Discord channel IDs(can be multiple, separated by colons) 
+(1) Discord channel IDs(can be multiple, separated by colons)  
 (2) Discord channel name(only for main channel's name)    
 (3) NTU account  
 (4) NTU password  
