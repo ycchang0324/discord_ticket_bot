@@ -1,6 +1,8 @@
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.alert import Alert
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, UnexpectedAlertPresentException, WebDriverException
 import time
 import re
@@ -59,100 +61,119 @@ def log_to_file(data, file_path):
 
 
 
-async def login(driver, url, account, password):
-    success = True
-    try:
-        if driver.session_id is None:
-            raise WebDriverException("Driver 已經被關閉。")
+def sync_login_process(driver, url, account, password):
 
-        # 導航到 URL
+    try:
+        # 設定頁面加載超時，防止無限期等待
+        driver.set_page_load_timeout(20) 
         driver.get(url)
         
-        # 點擊學生登入按鈕
-        student_button = driver.find_element(By.XPATH, '//a[@href="/sso2_go.php"]')
-        student_button.click()
+        # 使用快速輪詢的等待 (0.1秒檢查一次)
+        wait = WebDriverWait(driver, 10, poll_frequency=0.1)
+        
+        # 尋找學生登入按鈕
+        student_button = wait.until(EC.element_to_be_clickable((By.XPATH, '//a[@href="/sso2_go.php"]')))
+        
+        # 改用 JS 點擊：這比 .click() 更快，且不會因為瀏覽器鎖定而卡住底層通訊
+        driver.execute_script("arguments[0].click();", student_button)
 
-        # 輸入帳號
-        account_field = driver.find_element(By.XPATH, "//input[@name='ctl00$ContentPlaceHolder1$UsernameTextBox']")
-        account_field.send_keys(account)
-
-        # 輸入密碼
-        password_field = driver.find_element(By.XPATH, "//input[@name='ctl00$ContentPlaceHolder1$PasswordTextBox']")
-        password_field.send_keys(password)
-
-        # 點擊登入按鈕
-        login_btn = driver.find_element(By.XPATH, "//input[@name='ctl00$ContentPlaceHolder1$SubmitButton']")
-        login_btn.click()
-
-        # 等待並處理可能的彈出框
-        await asyncio.sleep(1)
-        alert = Alert(driver)
-        alert.accept()
+        # 填寫表單
+        user_input = wait.until(EC.presence_of_element_located((By.NAME, "ctl00$ContentPlaceHolder1$UsernameTextBox")))
+        user_input.send_keys(account)
+        
+        pass_input = driver.find_element(By.NAME, "ctl00$ContentPlaceHolder1$PasswordTextBox")
+        pass_input.send_keys(password)
+        
+        login_btn = driver.find_element(By.NAME, "ctl00$ContentPlaceHolder1$SubmitButton")
+        driver.execute_script("arguments[0].click();", login_btn)
+        
+        return True
 
     except NoSuchElementException as e:
         # 記錄找不到元素的錯誤
         logging.error(f"登入過程中找不到元素: {e}")
-        success = False
+        return False
 
         
     except TimeoutException as e:
         # 記錄超時錯誤
         logging.error(f"登入過程中操作超時: {e}")
-        success = False
+        return False
         
     except UnexpectedAlertPresentException as e:
         # 記錄未預期的彈出框錯誤
         logging.error(f"未預期的彈出框: {e}")
-        success = False
+        return False
         
     except WebDriverException as e:
         # 記錄 driver 被關閉或無法運行的錯誤
         logging.error(f"WebDriver 無法運行或已被關閉: {e}")
-        success = False
+        return False
         
     except Exception as e:
         # 捕捉所有其他未知錯誤並記錄
         logging.error(f"登入過程中發生未知錯誤: {e}")
-        success = False
+        return False
+    
 
+async def login(driver, url, account, password):
+    # 使用 asyncio.to_thread 將同步工作丟到別的 Thread
+    # 這樣你的 Discord Bot (主 Thread) 才能繼續跳動心跳 (Heartbeat)
+    success = await asyncio.to_thread(sync_login_process, driver, url, account, password)
     return success
 
-async def logout(driver):
-    success = True
+def sync_logout_process(driver):
+    """
+    純同步的登出邏輯，處理 Selenium 的阻塞操作
+    """
     try:
         if driver.session_id is None:
             raise WebDriverException("Driver 已經被關閉。")
 
-        logout_button = driver.find_element(By.XPATH, '//a[@title="登出"]')
-        logout_button.click()
-        await asyncio.sleep(1)
-
-        # 處理登出後的彈出警告框
-        alert = Alert(driver)
-        alert.accept()
-    except NoSuchElementException as e:
-        # 記錄找不到登出按鈕的錯誤
-        logging.error(f"找不到 '登出' 按鈕: {e}")
-        success = False
+        # 1. 使用 WebDriverWait 尋找登出按鈕
+        wait = WebDriverWait(driver, 10, poll_frequency=0.1)
+        logout_button = wait.until(EC.element_to_be_clickable((By.XPATH, '//a[@title="登出"]')))
         
-    except TimeoutException as e:
-        # 記錄彈出框超時的錯誤
-        logging.error(f"處理彈出框超時: {e}")
-        success = False
-    except UnexpectedAlertPresentException as e:
-        # 記錄未預期的彈出框錯誤
-        logging.error(f"未預期的彈出框: {e}")
-        success = False
-    except WebDriverException as e:
-        # 記錄 driver 被關閉或無法運行的錯誤
-        logging.error(f"WebDriver 無法運行或已被關閉: {e}")
-        success = False
-    except Exception as e:
-        # 記錄所有其他未知錯誤
-        logging.error(f"登出過程中發生未知錯誤: {e}")
-        success = False
+        # 2. 使用 JS 點擊，避免點擊後彈窗出現導致 Selenium 通訊卡死
+        driver.execute_script("arguments[0].click();", logout_button)
 
+        # 3. 處理彈窗
+        # 如果你已經設定了 unhandledPromptBehavior="accept"，
+        # 其實可以不用寫這段，但為了保險起見保留顯式處理
+        try:
+            wait.until(EC.alert_is_present())
+            alert = driver.switch_to.alert
+            alert.accept()
+        except TimeoutException:
+            # 如果設定了自動 accept，這裡抓不到彈窗是正常的
+            pass
+
+        return True
+
+    except NoSuchElementException as e:
+        logging.error(f"找不到 '登出' 按鈕: {e}")
+        return False
+    except TimeoutException as e:
+        logging.error(f"登出處理超時: {e}")
+        return False
+    except UnexpectedAlertPresentException as e:
+        logging.error(f"登出時遇到未預期彈窗: {e}")
+        # 如果遇到了就嘗試 accept 它
+        try: driver.switch_to.alert.accept()
+        except: pass
+        return False
+    except Exception as e:
+        logging.error(f"登出過程中發生未知錯誤: {e}")
+        return False
+
+async def logout(driver):
+    """
+    供 Discord Bot 呼叫的非同步介面
+    """
+    # 丟到 Thread 執行，防止阻塞 Discord Heartbeat
+    success = await asyncio.to_thread(sync_logout_process, driver)
     return success
+
 
 def crop_center(image_path, output_path, crop_width, crop_height):
     # 開啟截圖

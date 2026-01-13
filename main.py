@@ -81,6 +81,8 @@ chrome_options.add_argument("--window-size=1920,1080")  # 模擬螢幕解析度
 chrome_options.add_argument("--no-sandbox")  # 避免權限問題
 chrome_options.add_argument("--disable-dev-shm-usage")  # 避免共享內存不足
 
+# 關鍵：設定遇到所有彈窗自動點擊「確定」
+chrome_options.set_capability("unhandledPromptBehavior", "accept")
 # 建立 WebDriver 管理實例
 driver_manager = WebDriverManager(chrome_options)
 

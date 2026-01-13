@@ -35,6 +35,7 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
             
             if not await login(driver, your_web_url, your_account, your_password):
                 # 這裡改用 followup 因為 response 已經用過了
+                channel = bot.get_channel(int(interaction.channel_id))
                 if channel:
                     await channel.send("登入系統時出現問題")
                 return
@@ -43,6 +44,7 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
 
             res_num = get_ticket_num(driver, category)
             if res_num is None:
+                channel = bot.get_channel(int(interaction.channel_id))
                 if channel:
                     await channel.send("獲取票卷張數時出現問題")
                 return
@@ -71,6 +73,7 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
 
                 success = await check_ticket_num(driver, ticket_num, category)
                 if success is None:
+                    channel = bot.get_channel(int(interaction.channel_id))
                     if channel:
                         await channel.send("獲取票卷張數時出現問題")
                     return
@@ -122,6 +125,7 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
             print(f"發生錯誤: {e}")
             # 如果發生錯誤，確保能透過 followup 告知使用者
             try:
+                channel = bot.get_channel(int(interaction.channel_id))
                 if channel:
                     await channel.send("程式執行中發生錯誤，請聯絡管理員。")
             except:
