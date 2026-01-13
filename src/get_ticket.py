@@ -116,7 +116,8 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
                 if channel:
                     sent_message = await channel.send("結束生成。可以再次呼喚我了喔")
                     finish_messages_dict[int(channel_id)] = sent_message
-
+            
+            bot.is_ticket_generating = False
             await asyncio.sleep(60)
             for sent_message in finish_messages_dict.values():
                 await sent_message.delete()
