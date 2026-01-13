@@ -80,6 +80,7 @@ chrome_options.add_argument("--disable-gpu")  # 禁用 GPU 渲染
 chrome_options.add_argument("--window-size=1920,1080")  # 模擬螢幕解析度
 chrome_options.add_argument("--no-sandbox")  # 避免權限問題
 chrome_options.add_argument("--disable-dev-shm-usage")  # 避免共享內存不足
+#chrome_options.page_load_strategy = 'eager' # 只要 HTML 出來就開始執行下一步
 
 # 關鍵：設定遇到所有彈窗自動點擊「確定」
 chrome_options.set_capability("unhandledPromptBehavior", "accept")

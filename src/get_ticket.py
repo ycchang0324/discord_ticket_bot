@@ -5,6 +5,10 @@ import os
 
 async def get_ticket(bot, interaction: discord.Interaction, category, driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env):
     
+    # 1. 初始定義變數，防止 finally 找不到
+    finish_messages_dict = {} 
+    welcome_messages_dict = {}
+    
     # 1. 全域狀態檢查
     if bot.is_ticket_generating:
         # 如果已經 defer 過，要用 followup
@@ -117,10 +121,8 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
                     sent_message = await channel.send("結束生成。可以再次呼喚我了喔")
                     finish_messages_dict[int(channel_id)] = sent_message
             
-            bot.is_ticket_generating = False
-            await asyncio.sleep(60)
-            for sent_message in finish_messages_dict.values():
-                await sent_message.delete()
+            
+            
 
         except BrowserCriticalError as e:
             print(f"發生錯誤: {e}")
@@ -134,6 +136,16 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
         finally:
             # 5. 無論如何都解鎖
             bot.is_ticket_generating = False
+            
+            # 使用背景任務處理 60 秒後的刪除，不影響主邏輯
+            async def delayed_delete(msgs):
+                await asyncio.sleep(60)
+                for m in msgs:
+                    try: await m.delete()
+                    except: pass
+            
+            if finish_messages_dict:
+                asyncio.create_task(delayed_delete(finish_messages_dict.values()))
         
     else:
         # 頻道不對的回應

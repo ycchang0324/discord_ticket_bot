@@ -53,7 +53,7 @@ The setting for discord bot is shown in the following picture.
 (2) Discord channel name(only for main channel's name)    
 (3) NTU account  
 (4) NTU password  
-(5) NTU rental system url: https://rent.pe.ntu.edu.tw/member/  
+(5) NTU rental system sso url: https://rent.pe.ntu.edu.tw/sso2_go.php?BUrl= 
 (6) Discord bot token.    
 (7) Maintainer's ID  
 (8) Bot Name
