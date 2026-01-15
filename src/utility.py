@@ -1,6 +1,5 @@
 
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, UnexpectedAlertPresentException, WebDriverException
@@ -40,24 +39,6 @@ class BrowserCriticalError(Exception):
     """當 WebDriver 完全無法通訊或環境損壞時拋出"""
     pass
 
-def log_to_file(data, file_path):
-    # 獲取當前 Python 檔案的路徑
-    file_path = os.path.join(os.path.dirname(__file__), file_path)
-    
-    # 確保目錄存在，若不存在則創建
-    directory = os.path.dirname(file_path)
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    
-    # 獲取當前時間
-    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    
-    # 將時間加到日誌資料中
-    log_entry = f"{current_time} - {data}"
-    
-    # 以追加模式打開文件，若文件不存在則自動創建
-    with open(file_path, 'a', encoding='utf-8') as file:
-        file.write(log_entry + '\n')
 
 
 
@@ -75,7 +56,8 @@ def handle_error_diagnostics(driver, error_summary):
     except Exception as e:
         print(f"診斷失敗: {e}", flush=True)
 
-def sync_login_process(driver, url, account, password):
+
+async def login(driver, url, account, password):
     stage = "初始化"
     try:
         # 1. 載入 URL (建議直接用 sso2_go.php 的網址更穩)
@@ -133,18 +115,11 @@ def sync_login_process(driver, url, account, password):
         # 這裡會捕捉到剛剛那個 NoneType 錯誤並記錄
         handle_error_diagnostics(driver, f"❌ 登入失敗於 [{stage}]: {str(e)}")
         return False
-
-async def login(driver, url, account, password):
-    return await asyncio.to_thread(sync_login_process, driver, url, account, password)
-
-class BrowserCriticalError(Exception):
     """自定義瀏覽器嚴重錯誤"""
     pass
 
-def sync_logout_process(driver):
-    """
-    純同步的登出邏輯，處理 Selenium 的阻塞操作
-    """
+
+async def logout(driver):
     try:
         if driver.session_id is None:
             raise WebDriverException("Driver 已經被關閉。")
@@ -184,14 +159,6 @@ def sync_logout_process(driver):
     except Exception as e:
         logging.error(f"登出過程中發生未知錯誤: {e}")
         return False
-
-async def logout(driver):
-    """
-    供 Discord Bot 呼叫的非同步介面
-    """
-    # 丟到 Thread 執行，防止阻塞 Discord Heartbeat
-    success = await asyncio.to_thread(sync_logout_process, driver)
-    return success
 
 
 def crop_center(image_path, output_path, crop_width, crop_height):
@@ -297,7 +264,7 @@ async def check_ticket_num(driver, ticket_num, category):
     counter = 0
     TIMEOUT_SECONDS = 5 * 60  # 5 分鐘
     start_time = time.time()
-    while counter < 20 and (time.time() - start_time) < TIMEOUT_SECONDS:
+    while counter < 2 and (time.time() - start_time) < TIMEOUT_SECONDS:
         await asyncio.sleep(10)
         driver.refresh()
         system_ticket_num = get_ticket_num(driver, category)
@@ -310,6 +277,3 @@ async def check_ticket_num(driver, ticket_num, category):
         counter += 1
         print(f"現在的 counter: {counter}")
     return success
-
-    
-    

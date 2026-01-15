@@ -1,6 +1,6 @@
 import discord
 import asyncio
-from src.utility import log_to_file, login, logout, getImage, get_ticket_num, check_ticket_num, BrowserCriticalError
+from src.utility import login, logout, getImage, get_ticket_num, check_ticket_num, BrowserCriticalError
 import os
 
 async def get_ticket(bot, interaction: discord.Interaction, category, driver, your_web_url, your_account, your_password, target_channel_ids, target_channel_name, maintainer_id_env):
@@ -82,14 +82,14 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
                         await channel.send("獲取票卷張數時出現問題")
                     return
                 
-                usage_path = os.path.join(base_dir, 'log', 'usage.txt')
+            
                 user = await bot.fetch_user(int(maintainer_id_env))
 
                 if success:
                     # 更新訊息為成功 (注意 attachments 傳入空列表或新圖片)
-                    await interaction.edit_original_response(content=f"{sender_name} 已成功使用 {category} 票卷！ \n\n 再請你匯款或是街口支付了，詳細資訊可以發送 /help 來獲取喔", attachments=[empty_pic])
+                    await interaction.edit_original_response(content=f"{sender_name} 已成功使用 {category} 票卷！ \n\n 再請你匯款、Line Pay 或是街口支付了，詳細資訊可以發送 /help 來獲取喔", attachments=[empty_pic])
                     ticket_num = ticket_num - 1
-                    log_to_file(f"{sender_name} 成功使用 {category} QR Code，剩餘 {ticket_num} 張", usage_path)
+                    
                     
                     if user:
                         try:
@@ -99,8 +99,7 @@ async def get_ticket(bot, interaction: discord.Interaction, category, driver, yo
 
                 else:
                     await interaction.edit_original_response(content=f"{sender_name} 未使用 {category} QR Code，請重新生成><", attachments=[empty_pic])
-                    log_to_file(f"{sender_name} 未使用 {category} QR Code，剩餘 {ticket_num} 張", usage_path)
-
+                    
                     if user:
                         try:
                             await user.send(f"{sender_name} 未使用 {category} QR Code，剩餘 {ticket_num} 張")

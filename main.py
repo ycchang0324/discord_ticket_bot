@@ -36,7 +36,7 @@ bot.is_ticket_generating = False
 
 # 載入 .env 檔案中的環境變數
 load_dotenv()
-target_channel_ids = os.getenv('CHANNEL_IDS').split(',')
+target_channel_ids = os.getenv('CHANNEL_IDS_TEST').split(',')
 target_channel_name = os.getenv('CHANNEL_NAME')
 your_account = os.getenv('ACCOUNT')  # NTU COOL 帳號
 your_password = os.getenv('PASSWORD')  # NTU COOL 密碼
@@ -80,7 +80,6 @@ chrome_options.add_argument("--disable-gpu")  # 禁用 GPU 渲染
 chrome_options.add_argument("--window-size=1920,1080")  # 模擬螢幕解析度
 chrome_options.add_argument("--no-sandbox")  # 避免權限問題
 chrome_options.add_argument("--disable-dev-shm-usage")  # 避免共享內存不足
-#chrome_options.page_load_strategy = 'eager' # 只要 HTML 出來就開始執行下一步
 
 # 關鍵：設定遇到所有彈窗自動點擊「確定」
 chrome_options.set_capability("unhandledPromptBehavior", "accept")
