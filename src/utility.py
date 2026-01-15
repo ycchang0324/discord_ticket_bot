@@ -1,6 +1,5 @@
 
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, UnexpectedAlertPresentException, WebDriverException
@@ -40,24 +39,6 @@ class BrowserCriticalError(Exception):
     """當 WebDriver 完全無法通訊或環境損壞時拋出"""
     pass
 
-def log_to_file(data, file_path):
-    # 獲取當前 Python 檔案的路徑
-    file_path = os.path.join(os.path.dirname(__file__), file_path)
-    
-    # 確保目錄存在，若不存在則創建
-    directory = os.path.dirname(file_path)
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    
-    # 獲取當前時間
-    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    
-    # 將時間加到日誌資料中
-    log_entry = f"{current_time} - {data}"
-    
-    # 以追加模式打開文件，若文件不存在則自動創建
-    with open(file_path, 'a', encoding='utf-8') as file:
-        file.write(log_entry + '\n')
 
 
 
@@ -75,76 +56,10 @@ def handle_error_diagnostics(driver, error_summary):
     except Exception as e:
         print(f"診斷失敗: {e}", flush=True)
 
-def sync_login_process(driver, url, account, password):
-    stage = "初始化"
-    try:
-        # 1. 載入 URL (建議直接用 sso2_go.php 的網址更穩)
-        stage = "載入 SSO 頁面"
-        driver.set_page_load_timeout(25)
-        try:
-            driver.get(url)
-        except TimeoutException:
-            driver.execute_script("window.stop();")
-            
-        wait = WebDriverWait(driver, 20, poll_frequency=0.5)
 
-        # 2. 等待 ADFS 載入
-        stage = "等待 ADFS 頁面載入"
-        # 這裡改用自定義 Lambda，增加 NoneType 檢查
-        wait.until(lambda d: d.current_url and "adfs.ntu.edu.tw" in d.current_url)
 
-        # 3. 填寫帳號
-        stage = "填寫帳號"
-        user_input = wait.until(EC.presence_of_element_located((By.NAME, "ctl00$ContentPlaceHolder1$UsernameTextBox")))
-        user_input.clear()
-        user_input.send_keys(account)
 
-        stage = "填寫密碼"
-        pass_input = driver.find_element(By.NAME, "ctl00$ContentPlaceHolder1$PasswordTextBox")
-        pass_input.clear()
-        pass_input.send_keys(password)
-
-        # 4. 提交
-        stage = "點擊提交登入"
-        login_btn = driver.find_element(By.NAME, "ctl00$ContentPlaceHolder1$SubmitButton")
-        driver.execute_script("arguments[0].click();", login_btn)
-
-        # 5. 驗證回傳 (關鍵修正點)
-        stage = "驗證登入結果回傳"
-        
-        # 使用更穩健的驗證方式：等待「網址包含 rent」且「當前網址不為空」
-        def check_login_success(d):
-            url = d.current_url
-            if url is None:
-                return False
-            # 只要跳回租借系統網域，或者是已經進入 member 頁面，就判定成功
-            return "rent.pe.ntu.edu.tw" in url or "member" in url
-
-        wait.until(check_login_success)
-        
-        # 額外小保險：如果是回到 member 頁面，確保頁面不是空的
-        if "member" in (driver.current_url or ""):
-            print("DEBUG: 已確認跳轉至會員頁面", flush=True)
-
-        print(f"✅ [{datetime.now()}] 登入成功", flush=True)
-        return True
-
-    except Exception as e:
-        # 這裡會捕捉到剛剛那個 NoneType 錯誤並記錄
-        handle_error_diagnostics(driver, f"❌ 登入失敗於 [{stage}]: {str(e)}")
-        return False
-
-async def login(driver, url, account, password):
-    return await asyncio.to_thread(sync_login_process, driver, url, account, password)
-
-class BrowserCriticalError(Exception):
-    """自定義瀏覽器嚴重錯誤"""
-    pass
-
-def sync_logout_process(driver):
-    """
-    純同步的登出邏輯，處理 Selenium 的阻塞操作
-    """
+async def logout(driver):
     try:
         if driver.session_id is None:
             raise WebDriverException("Driver 已經被關閉。")
@@ -184,14 +99,6 @@ def sync_logout_process(driver):
     except Exception as e:
         logging.error(f"登出過程中發生未知錯誤: {e}")
         return False
-
-async def logout(driver):
-    """
-    供 Discord Bot 呼叫的非同步介面
-    """
-    # 丟到 Thread 執行，防止阻塞 Discord Heartbeat
-    success = await asyncio.to_thread(sync_logout_process, driver)
-    return success
 
 
 def crop_center(image_path, output_path, crop_width, crop_height):
@@ -310,6 +217,3 @@ async def check_ticket_num(driver, ticket_num, category):
         counter += 1
         print(f"現在的 counter: {counter}")
     return success
-
-    
-    
