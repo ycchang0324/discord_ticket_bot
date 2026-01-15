@@ -57,6 +57,66 @@ def handle_error_diagnostics(driver, error_summary):
         print(f"診斷失敗: {e}", flush=True)
 
 
+async def login(driver, url, account, password):
+    stage = "初始化"
+    try:
+        # 1. 載入 URL (建議直接用 sso2_go.php 的網址更穩)
+        stage = "載入 SSO 頁面"
+        driver.set_page_load_timeout(25)
+        try:
+            driver.get(url)
+        except TimeoutException:
+            driver.execute_script("window.stop();")
+            
+        wait = WebDriverWait(driver, 20, poll_frequency=0.5)
+
+        # 2. 等待 ADFS 載入
+        stage = "等待 ADFS 頁面載入"
+        # 這裡改用自定義 Lambda，增加 NoneType 檢查
+        wait.until(lambda d: d.current_url and "adfs.ntu.edu.tw" in d.current_url)
+        
+        # 3. 填寫帳號
+        stage = "填寫帳號"
+        user_input = wait.until(EC.presence_of_element_located((By.NAME, "ctl00$ContentPlaceHolder1$UsernameTextBox")))
+        user_input.clear()
+        user_input.send_keys(account)
+
+        stage = "填寫密碼"
+        pass_input = driver.find_element(By.NAME, "ctl00$ContentPlaceHolder1$PasswordTextBox")
+        pass_input.clear()
+        pass_input.send_keys(password)
+
+        # 4. 提交
+        stage = "點擊提交登入"
+        login_btn = driver.find_element(By.NAME, "ctl00$ContentPlaceHolder1$SubmitButton")
+        driver.execute_script("arguments[0].click();", login_btn)
+
+        # 5. 驗證回傳 (關鍵修正點)
+        stage = "驗證登入結果回傳"
+
+        # 使用更穩健的驗證方式：等待「網址包含 rent」且「當前網址不為空」
+        def check_login_success(d):
+            url = d.current_url
+            if url is None:
+                return False
+            # 只要跳回租借系統網域，或者是已經進入 member 頁面，就判定成功
+            return "rent.pe.ntu.edu.tw" in url or "member" in url
+
+        wait.until(check_login_success)
+        
+        # 額外小保險：如果是回到 member 頁面，確保頁面不是空的
+        if "member" in (driver.current_url or ""):
+            print("DEBUG: 已確認跳轉至會員頁面", flush=True)
+
+        print(f"✅ [{datetime.now()}] 登入成功", flush=True)
+        return True
+
+    except Exception as e:
+        # 這裡會捕捉到剛剛那個 NoneType 錯誤並記錄
+        handle_error_diagnostics(driver, f"❌ 登入失敗於 [{stage}]: {str(e)}")
+        return False
+    """自定義瀏覽器嚴重錯誤"""
+    pass
 
 
 async def logout(driver):

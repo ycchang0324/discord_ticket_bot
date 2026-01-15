@@ -2,12 +2,9 @@
 import discord
 # 導入commands指令模組
 from discord.ext import commands
-from discord import app_commands 
 import os
 
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 
 
@@ -16,7 +13,6 @@ from src.utility import BrowserCriticalError
 from dotenv import load_dotenv
 
 import time
-from pathlib import Path
 import asyncio
 
 # 1. 建立 Bot 類別來處理同步 (這樣最穩)

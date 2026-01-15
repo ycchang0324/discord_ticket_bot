@@ -21,7 +21,7 @@ services:
         test: ["CMD-SHELL", "find /tmp/heartbeat -mmin -6 | grep . || exit 1"]
         interval: 2m       
         timeout: 10s       
-        retries: 3         
+        retries: 30         
         start_period: 1m   
 
     # 限制日誌大小，防止 Docker 的日誌檔把硬碟撐爆
